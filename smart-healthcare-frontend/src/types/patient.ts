@@ -76,6 +76,7 @@ export interface DoctorPatientRow {
   riskScore: number | null;
   riskLevel: RiskLevel | null;
   hasAccount: boolean;
+  emergencyPhone: string | null;
 }
 
 export type RiskLevel = "low" | "medium" | "high" | "critical";
@@ -106,4 +107,5 @@ export interface ExtractedEntity {
   entityType: string;
   entityValue: string;
   confidence: number | null;
+  negated: boolean;
 }

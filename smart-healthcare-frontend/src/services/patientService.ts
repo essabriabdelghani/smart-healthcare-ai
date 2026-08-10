@@ -72,6 +72,7 @@ interface DoctorPatientRowApiResponse {
   risk_score: number | null;
   risk_level: RiskLevel | null;
   has_account: boolean;
+  emergency_phone: string | null;
 }
 
 interface ExtractedEntityApiResponse {
@@ -80,6 +81,7 @@ interface ExtractedEntityApiResponse {
   entity_type: string;
   entity_value: string;
   confidence: number | null;
+  negated: boolean;
 }
 
 /* =========================================================
@@ -139,6 +141,7 @@ function toDoctorPatientRow(r: DoctorPatientRowApiResponse): DoctorPatientRow {
     riskScore: r.risk_score,
     riskLevel: r.risk_level,
     hasAccount: r.has_account,
+    emergencyPhone: r.emergency_phone,
   };
 }
 
@@ -149,6 +152,7 @@ function toExtractedEntity(e: ExtractedEntityApiResponse): ExtractedEntity {
     entityType: e.entity_type,
     entityValue: e.entity_value,
     confidence: e.confidence,
+    negated: e.negated,
   };
 }
 

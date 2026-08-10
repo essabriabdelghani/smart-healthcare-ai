@@ -1,22 +1,11 @@
-from app.models.risk_assessment import RiskLevel
+"""
+Calcul du score de risque à partir des entités déjà extraites par
+nlp_service.extract_entities() — plus de recherche de mots-clés séparée ici :
+le score dépend réellement de ce que le NLP a trouvé (voir clinical_vocabulary.py
+pour la source des poids), pas d'une logique dupliquée et désynchronisée.
+"""
 
-SYMPTOM_KEYWORDS: dict[str, tuple[str, int]] = {
-    "chest pain": ("Chest pain reported", 35),
-    "douleur thoracique": ("Chest pain reported", 35),
-    "shortness of breath": ("Shortness of breath", 30),
-    "essoufflement": ("Shortness of breath", 30),
-    "difficulté à respirer": ("Difficulty breathing", 30),
-    "difficulty breathing": ("Difficulty breathing", 30),
-    "confusion": ("Confusion", 25),
-    "bleeding": ("Bleeding", 25),
-    "saignement": ("Bleeding", 25),
-    "fainting": ("Fainting / loss of consciousness", 30),
-    "évanouissement": ("Fainting / loss of consciousness", 30),
-    "fatigue": ("Fatigue", 5),
-    "faiblesse": ("Weakness", 8),
-    "headache": ("Headache", 5),
-    "mal de tête": ("Headache", 5),
-}
+from app.models.risk_assessment import RiskLevel
 
 
 def score_to_level(score: int) -> RiskLevel:
@@ -30,21 +19,33 @@ def score_to_level(score: int) -> RiskLevel:
 
 
 def compute_risk(
-    symptoms_text: str,
-    medical_history: str = "",
+    entities: list[dict],
     temperature: float | None = None,
     heart_rate: int | None = None,
     oxygen_saturation: float | None = None,
     blood_pressure: str | None = None,
 ) -> dict:
-    text = f"{symptoms_text} {medical_history}".lower()
+    """
+    entities : la liste "entities" renvoyée par nlp_service.extract_entities()
+    — chaque élément a "value", "negated", "concept_id", "weight".
+    """
     factors: list[str] = []
     score = 0
+    counted_concepts: set[str] = set()
 
-    for keyword, (label, weight) in SYMPTOM_KEYWORDS.items():
-        if keyword in text:
-            factors.append(f"{label} (+{weight})")
-            score += weight
+    for ent in entities:
+        weight = ent.get("weight") or 0
+        if ent.get("negated") or weight <= 0:
+            continue  # nié par le patient, ou concept purement informationnel (médicament/allergie)
+
+        concept_id = ent.get("concept_id")
+        if concept_id:
+            if concept_id in counted_concepts:
+                continue  # déjà compté (ex: medspaCy ET mots-clés ont trouvé la même chose)
+            counted_concepts.add(concept_id)
+
+        factors.append(f"{ent['value']} (+{weight})")
+        score += weight
 
     if temperature is not None and temperature >= 38.5:
         factors.append(f"High fever {temperature}°C (+20)")

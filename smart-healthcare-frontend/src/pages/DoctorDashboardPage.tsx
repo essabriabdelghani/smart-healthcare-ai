@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { getDoctorPatients } from "../services/patientService";
 import type { DoctorPatientRow, RiskLevel } from "../types/patient";
@@ -10,12 +10,83 @@ const riskDot: Record<RiskLevel, string> = {
   critical: "bg-risk-critical",
 };
 
+const riskText: Record<RiskLevel, string> = {
+  low: "text-risk-low",
+  medium: "text-risk-medium",
+  high: "text-risk-high",
+  critical: "text-risk-critical",
+};
+
 const riskLabel: Record<RiskLevel, string> = {
   low: "Faible",
   medium: "Modéré",
   high: "Élevé",
   critical: "Critique",
 };
+
+function formatRelativeTime(iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const minutes = Math.floor(diffMs / 60000);
+  if (minutes < 1) return "à l'instant";
+  if (minutes < 60) return `il y a ${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `il y a ${hours} h`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return "il y a 1 jour";
+  if (days < 7) return `il y a ${days} jours`;
+  const weeks = Math.floor(days / 7);
+  if (weeks === 1) return "il y a 1 semaine";
+  if (weeks < 5) return `il y a ${weeks} semaines`;
+  const months = Math.floor(days / 30);
+  if (months <= 1) return "il y a 1 mois";
+  return `il y a ${months} mois`;
+}
+
+function formatPhone(phone: string): string {
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length < 6) return phone;
+  return digits.match(/.{1,2}/g)?.join(" ") ?? phone;
+}
+
+interface PatientGroup {
+  key: string;
+  phoneLabel: string;
+  rows: DoctorPatientRow[];
+  needsReview: boolean;
+  latestCreatedAt: string;
+}
+
+function groupByContact(rows: DoctorPatientRow[]): PatientGroup[] {
+  const groups = new Map<string, DoctorPatientRow[]>();
+
+  for (const row of rows) {
+    const key = row.emergencyPhone?.trim() || `__no_contact__:${row.patientId}`;
+    const existing = groups.get(key);
+    if (existing) {
+      existing.push(row);
+    } else {
+      groups.set(key, [row]);
+    }
+  }
+
+  const result: PatientGroup[] = [];
+  for (const [key, groupRows] of groups) {
+    const sorted = [...groupRows].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+    result.push({
+      key,
+      phoneLabel: key.startsWith("__no_contact__") ? "Sans contact renseigné" : formatPhone(key),
+      rows: sorted,
+      needsReview: sorted.length > 1,
+      latestCreatedAt: sorted[0].createdAt,
+    });
+  }
+
+  return result.sort(
+    (a, b) => new Date(b.latestCreatedAt).getTime() - new Date(a.latestCreatedAt).getTime()
+  );
+}
 
 export default function DoctorDashboardPage() {
   const [rows, setRows] = useState<DoctorPatientRow[]>([]);
@@ -30,12 +101,15 @@ export default function DoctorDashboardPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const filtered = rows.filter((r) =>
-    `${r.firstName} ${r.lastName} ${r.reasonForVisit}`
-      .toLowerCase()
-      .includes(search.toLowerCase())
-  );
+  const filteredRows = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return rows;
+    return rows.filter((r) =>
+      `${r.firstName} ${r.lastName} ${r.reasonForVisit}`.toLowerCase().includes(q)
+    );
+  }, [rows, search]);
 
+  const groups = useMemo(() => groupByContact(filteredRows), [filteredRows]);
   const criticalCount = rows.filter((r) => r.riskLevel === "critical").length;
 
   return (
@@ -45,7 +119,7 @@ export default function DoctorDashboardPage() {
           <span className="text-xs font-medium uppercase tracking-widest text-brass">
             Vue clinicien
           </span>
-          <h1 className="font-display text-4xl text-pine">Patients</h1>
+          <h1 className="font-display text-4xl text-pine">Patients regroupés</h1>
           {criticalCount > 0 && (
             <p className="mt-1 text-sm font-medium text-risk-critical">
               {criticalCount} cas critique{criticalCount > 1 ? "s" : ""} en attente de revue
@@ -75,72 +149,96 @@ export default function DoctorDashboardPage() {
         <div className="rounded-2xl border border-risk-high/20 bg-risk-high/5 px-8 py-10 text-center">
           <p className="text-risk-high">{error}</p>
         </div>
-      ) : filtered.length === 0 ? (
+      ) : groups.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-sand-dark bg-paper-raised px-8 py-16 text-center">
-          <p className="text-ink-soft">Aucun patient pour le moment.</p>
-          <Link
-            to="/doctor/patients/new"
-            className="mt-3 inline-block font-medium text-pine hover:text-pine-dark"
-          >
-            Ajouter le premier patient →
-          </Link>
+          <p className="text-ink-soft">
+            {search ? "Aucun résultat pour cette recherche." : "Aucun patient pour le moment."}
+          </p>
+          {!search && (
+            <Link
+              to="/doctor/patients/new"
+              className="mt-3 inline-block font-medium text-pine hover:text-pine-dark"
+            >
+              Ajouter le premier patient →
+            </Link>
+          )}
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-sand-dark/60 bg-paper-raised shadow-sm">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-sand-dark/60 text-xs uppercase tracking-wide text-ink-soft">
-                <th className="px-5 py-3 font-medium">Patient</th>
-                <th className="px-5 py-3 font-medium">Naissance</th>
-                <th className="px-5 py-3 font-medium">Motif</th>
-                <th className="px-5 py-3 font-medium">Admission</th>
-                <th className="px-5 py-3 font-medium">Risque</th>
-                <th className="px-5 py-3"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((r) => (
-                <tr
+        <div className="space-y-6">
+          {groups.map((group) => (
+            <div
+              key={group.key}
+              className="overflow-hidden rounded-2xl border border-sand-dark/60 bg-paper-raised shadow-sm"
+            >
+              <div
+                className={`flex items-center justify-between px-5 py-3 ${
+                  group.needsReview ? "bg-sage-light/50" : "bg-sand/30"
+                }`}
+              >
+                <span className="font-mono text-sm tracking-wide text-ink">
+                  {group.phoneLabel}
+                </span>
+                {group.needsReview ? (
+                  <span className="rounded-full bg-brass/15 px-3 py-1 text-xs font-medium text-brass">
+                    À vérifier — {group.rows.length} admissions
+                  </span>
+                ) : (
+                  <span className="text-xs text-ink-soft">
+                    {group.rows.length} admission{group.rows.length > 1 ? "s" : ""}
+                  </span>
+                )}
+              </div>
+
+              {group.rows.map((r) => (
+                <div
                   key={r.intakeId}
-                  className="border-b border-sand-dark/40 last:border-0 hover:bg-sage-light/30"
+                  className="flex items-center justify-between border-t border-sand-dark/40 px-5 py-3.5 hover:bg-sage-light/20"
                 >
-                  <td className="px-5 py-3.5 font-medium text-ink">
-                    {r.firstName} {r.lastName}
-                    {!r.hasAccount && (
-                      <span className="ml-2 rounded-full border border-brass/40 bg-brass/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-brass">
-                        Admission directe
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-5 py-3.5 font-mono text-xs text-ink-soft">
-                    {r.dateOfBirth}
-                  </td>
-                  <td className="px-5 py-3.5 text-ink-soft">{r.reasonForVisit}</td>
-                  <td className="px-5 py-3.5 font-mono text-xs text-ink-soft">
-                    {new Date(r.createdAt).toLocaleDateString("fr-FR")}
-                  </td>
-                  <td className="px-5 py-3.5">
-                    {r.riskLevel ? (
+                  <div>
+                    <p className="font-medium text-ink">
+                      {r.firstName} {r.lastName}
+                      {!r.hasAccount && (
+                        <span className="ml-2 rounded-full border border-brass/40 bg-brass/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-brass">
+                          Admission directe
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-sm text-ink-soft">
+                      {r.reasonForVisit} · {formatRelativeTime(r.createdAt)}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    {r.riskLevel && r.riskScore !== null ? (
                       <span className="inline-flex items-center gap-2">
                         <span className={`h-2 w-2 rounded-full ${riskDot[r.riskLevel]}`} />
-                        {riskLabel[r.riskLevel]}
+                        <span className={`font-mono text-sm font-medium ${riskText[r.riskLevel]}`}>
+                          {r.riskScore}
+                        </span>
                       </span>
                     ) : (
-                      <span className="text-ink-soft">—</span>
+                      <span className="text-sm text-ink-soft">—</span>
                     )}
-                  </td>
-                  <td className="px-5 py-3.5 text-right">
                     <Link
                       to={`/risk-result/${r.intakeId}`}
-                      className="font-medium text-pine hover:text-pine-dark"
+                      className="text-sm font-medium text-pine hover:text-pine-dark"
                     >
-                      Voir →
+                      Voir
                     </Link>
-                  </td>
-                </tr>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+          ))}
+
+          <div className="flex flex-wrap items-center gap-5 rounded-2xl border border-sand-dark/60 bg-paper-raised px-5 py-3.5">
+            {(["low", "medium", "high", "critical"] as RiskLevel[]).map((level) => (
+              <span key={level} className="inline-flex items-center gap-2 text-sm text-ink-soft">
+                <span className={`h-2 w-2 rounded-full ${riskDot[level]}`} />
+                {riskLabel[level]}
+              </span>
+            ))}
+          </div>
         </div>
       )}
     </div>

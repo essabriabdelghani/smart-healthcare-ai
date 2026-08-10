@@ -7,6 +7,7 @@ from sqlalchemy import (
     ForeignKey,
     DECIMAL,
     Text,
+    Boolean,
 )
 from sqlalchemy.sql import func
 
@@ -29,5 +30,10 @@ class ExtractedEntity(Base):
     entity_value = Column(Text, nullable=False)
 
     confidence = Column(DECIMAL(5,2))
+
+    # True = le patient a explicitement NIÉ ce symptôme/antécédent
+    # (ex: "no chest pain", "pas de fièvre"). Conservé pour l'audit, mais
+    # exclu du score de risque.
+    negated = Column(Boolean, nullable=False, default=False)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())

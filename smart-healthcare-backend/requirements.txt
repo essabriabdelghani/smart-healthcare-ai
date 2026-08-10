@@ -1,15 +1,86 @@
-SQLAlchemy==2.0.51
-pymysql
-cryptography
-bcrypt==5.0.0
-email-validator==2.3.0
-fastapi==0.141.1
-pydantic-settings==2.14.2
-pydantic==2.13.4
-pydantic_core==2.46.4
-python-dotenv==1.2.2
-python-jose==3.5.0
-python-multipart==0.0.32
-uvicorn==0.52.1
+# =========================================================
+# SMART HEALTHCARE AI - BACKEND
+# Python 3.11
+# =========================================================
+
+# -------------------------
+# FastAPI / Server
+# -------------------------
+fastapi==0.116.1
+uvicorn[standard]==0.35.0
+
+# -------------------------
+# Database
+# -------------------------
+SQLAlchemy==2.0.43
+PyMySQL==1.1.1
+
+# -------------------------
+# Pydantic
+# -------------------------
+pydantic==2.11.7
+pydantic-settings==2.10.1
+email-validator==2.2.0
+
+# -------------------------
+# Authentication / Security
+# -------------------------
+python-jose[cryptography]==3.5.0
+bcrypt==4.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.20
+
+# -------------------------
+# Environment variables
+# -------------------------
+python-dotenv==1.1.1
+
+# =========================================================
+# NLP MEDICAL
+# =========================================================
+
+# spaCy compatible with Python 3.11 + medspaCy
+spacy==3.7.5
+
+# Clinical NLP
 medspacy==1.3.1
-spacy==3.8.15
+
+# Medical concept extraction
+medspacy-quickumls==3.2
+
+# Sentence boundary detection
+pysbd==0.3.4
+
+# Fast rule-based NLP
+PyFastNER==1.0.10
+
+# String similarity
+pysimstring==1.3.0
+
+# =========================================================
+# NLP / ML utilities
+# =========================================================
+
+numpy==1.26.4
+scikit-learn==1.7.1
+
+# =========================================================
+# HTTP / API utilities
+# =========================================================
+
+requests==2.32.4
+httpx==0.28.1
+
+# =========================================================
+# Data processing
+# =========================================================
+
+pandas==2.3.1
+
+# =========================================================
+# Logging
+# =========================================================
+
+loguru==0.7.3
+pip install https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
+langdetect==1.0.9

@@ -37,3 +37,4 @@ class DoctorPatientRow(BaseModel):
     risk_level: str | None = None
 
     has_account: bool  # False = dossier "admission directe" (pas de compte patient)
+    emergency_phone: str | None = None  # sert de clé de regroupement au dashboard médecin

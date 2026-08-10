@@ -53,6 +53,7 @@ def doctor_patients(
             risk_score=assessment.risk_score if assessment else None,
             risk_level=assessment.risk_level.value if assessment else None,
             has_account=patient.user_id is not None,
+            emergency_phone=patient.emergency_phone,
         )
         for intake, patient, assessment in rows
     ]

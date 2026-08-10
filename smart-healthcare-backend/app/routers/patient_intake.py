@@ -20,7 +20,7 @@ from app.schemas.patient_intake import (
     ExtractedEntityOut,
 )
 from app.services.risk_scoring import compute_risk
-from app.services.nlp_service import extract_and_persist_entities
+from app.services.nlp_service import extract_entities, persist_entities
 
 router = APIRouter(prefix="/patients/intake", tags=["Patient Intake"])
 
@@ -48,19 +48,26 @@ def get_or_create_patient(db: Session, current_user: User) -> Patient:
 
 def _run_intake_pipeline(db: Session, intake: PatientIntake) -> None:
     """NLP (extraction d'entités) + calcul du score de risque pour un intake
-    fraîchement créé. Partagé entre la création patient et la création staff."""
+    fraîchement créé. Partagé entre la création patient et la création staff.
+    Un seul appel NLP : le score consomme directement ce que l'extraction a
+    trouvé (négation comprise), au lieu de reparser le texte séparément."""
 
-    # NLP : ne doit jamais faire échouer la soumission si le NLP plante.
+    nlp_text = f"{intake.symptoms_text} {intake.medical_history or ''}"
+
+    # Ne doit jamais faire échouer la soumission si le NLP plante.
     try:
-        nlp_text = f"{intake.symptoms_text} {intake.medical_history or ''}"
-        extract_and_persist_entities(db, intake.id, nlp_text)
+        nlp_result = extract_entities(nlp_text)
+    except Exception:
+        nlp_result = {"language": "en", "used_clinical_model": False, "entities": []}
+
+    try:
+        persist_entities(db, intake.id, nlp_result)
         db.commit()
     except Exception:
         db.rollback()
 
     risk = compute_risk(
-        symptoms_text=intake.symptoms_text,
-        medical_history=intake.medical_history or "",
+        entities=nlp_result["entities"],
         temperature=float(intake.temperature) if intake.temperature is not None else None,
         heart_rate=intake.heart_rate,
         oxygen_saturation=float(intake.oxygen_saturation) if intake.oxygen_saturation is not None else None,
