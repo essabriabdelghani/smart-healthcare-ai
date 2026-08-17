@@ -16,6 +16,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<UserRole>("patient");
+  const [clinicName, setClinicName] = useState("");
 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -40,7 +41,8 @@ export default function RegisterPage() {
         fullName,
         email,
         password,
-        role
+        role,
+        clinicName
       );
 
       navigate(roleHome(me.role));
@@ -142,6 +144,26 @@ export default function RegisterPage() {
                   </option>
                 ))}
               </select>
+            </label>
+
+            <label className="block">
+              <span className="text-xs font-medium uppercase tracking-wide text-ink-soft">
+                Clinique
+              </span>
+
+              <input
+                value={clinicName}
+                onChange={(e) => setClinicName(e.target.value)}
+                placeholder="Ex. Clinique Atlas"
+                required
+                className="mt-1.5 w-full rounded-lg border border-sand-dark bg-paper px-3.5 py-2.5 text-ink outline-none transition-colors focus:border-pine"
+              />
+
+              <p className="mt-1.5 text-xs text-ink-soft">
+                {role === "patient"
+                  ? "La clinique où vous allez consulter."
+                  : "Si cette clinique existe déjà, vous la rejoignez automatiquement. Sinon, elle est créée."}
+              </p>
             </label>
 
             {error && (

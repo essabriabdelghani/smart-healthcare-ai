@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { getDoctorPatients } from "../services/patientService";
+import { useAuth } from "../contexts/AuthContext";
 import type { DoctorPatientRow, RiskLevel } from "../types/patient";
 
 const riskDot: Record<RiskLevel, string> = {
@@ -89,6 +90,9 @@ function groupByContact(rows: DoctorPatientRow[]): PatientGroup[] {
 }
 
 export default function DoctorDashboardPage() {
+  const { user } = useAuth();
+  const canAddPatient = user?.role === "doctor";
+
   const [rows, setRows] = useState<DoctorPatientRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -134,12 +138,14 @@ export default function DoctorDashboardPage() {
             onChange={(e) => setSearch(e.target.value)}
             className="w-64 rounded-lg border border-sand-dark bg-paper-raised px-3.5 py-2 text-sm text-ink outline-none transition-colors focus:border-pine"
           />
-          <Link
-            to="/doctor/patients/new"
-            className="whitespace-nowrap rounded-lg bg-pine px-4 py-2 text-sm font-medium text-paper transition-colors hover:bg-pine-dark"
-          >
-            + Ajouter un patient
-          </Link>
+          {canAddPatient && (
+            <Link
+              to="/doctor/patients/new"
+              className="whitespace-nowrap rounded-lg bg-pine px-4 py-2 text-sm font-medium text-paper transition-colors hover:bg-pine-dark"
+            >
+              + Ajouter un patient
+            </Link>
+          )}
         </div>
       </div>
 
@@ -154,7 +160,7 @@ export default function DoctorDashboardPage() {
           <p className="text-ink-soft">
             {search ? "Aucun résultat pour cette recherche." : "Aucun patient pour le moment."}
           </p>
-          {!search && (
+          {!search && canAddPatient && (
             <Link
               to="/doctor/patients/new"
               className="mt-3 inline-block font-medium text-pine hover:text-pine-dark"

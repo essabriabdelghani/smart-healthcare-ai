@@ -35,6 +35,7 @@ def get_or_create_patient(db: Session, current_user: User) -> Patient:
     patient = Patient(
         user_id=current_user.id,
         created_by=current_user.id,
+        clinic_id=current_user.clinic_id,
         first_name=first_name,
         last_name=last_name,
         gender="unspecified",
@@ -123,15 +124,16 @@ def create_staff_patient_intake(
     """Admission directe créée par un médecin/admin : identité + motif de
     visite en une seule requête, sans compte de connexion pour le patient."""
 
-    if current_user.role not in ("doctor", "admin"):
+    if current_user.role != "doctor":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only doctors or admins can register a walk-in patient",
+            detail="Only doctors can register a walk-in patient",
         )
 
     patient = Patient(
         user_id=None,
         created_by=current_user.id,
+        clinic_id=current_user.clinic_id,
         first_name=payload.first_name,
         last_name=payload.last_name,
         gender=payload.gender,
@@ -164,21 +166,29 @@ def create_staff_patient_intake(
 
 
 def _can_access(intake: PatientIntake, patient: Patient | None, current_user: User) -> bool:
-    """Patient/doctor/admin : le patient ne peut voir que ses propres intakes."""
-    if current_user.role in ("doctor", "admin"):
-        return True
-    return patient is not None and patient.user_id == current_user.id
+    """Patient : uniquement ses propres intakes.
+    Médecin/admin : uniquement les intakes des patients de SA clinique."""
+    if patient is None:
+        return False
+    if current_user.role == "patient":
+        return patient.user_id == current_user.id
+    return patient.clinic_id == current_user.clinic_id
 
 
 @router.get("", response_model=list[PatientIntakeOut])
 def get_all_intakes(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    query = db.query(PatientIntake).order_by(PatientIntake.created_at.desc())
+    query = db.query(PatientIntake).join(Patient, Patient.id == PatientIntake.patient_id)
+
     if current_user.role == "patient":
         own_patient = db.query(Patient).filter(Patient.user_id == current_user.id).first()
         if own_patient is None:
             return []
         query = query.filter(PatientIntake.patient_id == own_patient.id)
-    return query.all()
+    else:
+        # Médecin/admin : uniquement les admissions des patients de SA clinique.
+        query = query.filter(Patient.clinic_id == current_user.clinic_id)
+
+    return query.order_by(PatientIntake.created_at.desc()).all()
 
 
 @router.get("/{intake_id}", response_model=PatientIntakeOut)

@@ -8,6 +8,10 @@ class DashboardStatsOut(BaseModel):
 
     total_assessments: int
 
+    total_users: int
+
+    doctors_count: int
+
     low_risk: int
 
     medium_risk: int

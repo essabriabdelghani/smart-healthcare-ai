@@ -124,6 +124,33 @@ def _get_nlp():
 # Mots-clés multilingues (repli EN + seule couverture FR/AR)
 # ---------------------------------------------------------------------------
 
+def _find_term_position(sentence: str, term: str) -> int:
+    """Cherche `term` dans `sentence`. D'abord en substring exacte (rapide,
+    position précise). Si absent ET que le terme a plusieurs mots, se replie
+    sur une recherche "tous les mots présents, proches les uns des autres" —
+    utile quand un adjectif s'intercale (ex: "ألم [مفاجئ] في الصدر" au lieu
+    de "ألم في الصدر" collé). Retourne -1 si rien ne matche.
+    """
+    idx = sentence.find(term)
+    if idx != -1:
+        return idx
+
+    words = term.split()
+    if len(words) < 2:
+        return -1
+
+    positions = [sentence.find(w) for w in words]
+    if any(p == -1 for p in positions):
+        return -1
+
+    # Les mots doivent être relativement proches (même proposition, pas
+    # dispersés dans toute la phrase) pour éviter les faux positifs.
+    if max(positions) - min(positions) > 30:
+        return -1
+
+    return min(positions)
+
+
 def _extract_keywords_with_negation(text: str) -> list[dict]:
     text_lower = text.lower()
     found: list[dict] = []
@@ -131,7 +158,7 @@ def _extract_keywords_with_negation(text: str) -> list[dict]:
 
     for sentence in split_sentences(text_lower):
         for term, concept in ALL_TERMS_INDEX.items():
-            idx = sentence.find(term)
+            idx = _find_term_position(sentence, term)
             if idx == -1 or term in seen:
                 continue
             seen.add(term)

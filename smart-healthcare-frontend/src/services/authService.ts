@@ -15,6 +15,7 @@ export interface RegisterPayload {
   email: string;
   password: string;
   role: UserRole;
+  clinic_name: string;
 }
 
 /* ==========================
@@ -65,6 +66,26 @@ export async function register(
 export async function getMe(): Promise<User> {
   const { data } = await api.get<User>("/auth/me");
 
+  return data;
+}
+
+/* ==========================
+   Update Profile (Paramètres)
+========================== */
+
+export async function updateProfile(payload: {
+  full_name?: string;
+  phone?: string;
+}): Promise<User> {
+  const { data } = await api.patch<User>("/auth/me", payload);
+  return data;
+}
+
+export async function changePassword(payload: {
+  current_password: string;
+  new_password: string;
+}): Promise<{ message: string }> {
+  const { data } = await api.patch("/auth/me/password", payload);
   return data;
 }
 

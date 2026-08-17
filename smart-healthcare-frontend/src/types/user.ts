@@ -9,6 +9,10 @@ export interface User {
 
   role: UserRole;
 
+  clinic_id: string;
+
+  clinic_name: string | null;
+
   phone: string | null;
 
   is_active: boolean;
@@ -31,4 +35,5 @@ export interface RegisterPayload {
   email: string;
   password: string;
   role: UserRole;
+  clinic_name: string;
 }

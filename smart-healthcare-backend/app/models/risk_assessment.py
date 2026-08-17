@@ -48,4 +48,12 @@ class RiskAssessment(Base):
         nullable=True,
     )
 
+    reviewed_at = Column(DateTime(timezone=True), nullable=True)
+
+    # Renseignés uniquement si le médecin AJUSTE le score IA (sinon il l'a
+    # simplement confirmé tel quel — reviewed_by/reviewed_at suffisent).
+    override_score = Column(DECIMAL(5, 2), nullable=True)
+    override_level = Column(Enum(RiskLevel), nullable=True)
+    override_note = Column(Text, nullable=True)
+
     created_at = Column(DateTime(timezone=True), server_default=func.now())

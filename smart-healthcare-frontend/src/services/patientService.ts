@@ -9,6 +9,7 @@ import type {
   RiskResult,
   RiskLevel,
   ExtractedEntity,
+  ClinicalNote,
 } from "../types/patient";
 
 /* =========================================================
@@ -40,6 +41,10 @@ interface RiskAssessmentApiResponse {
   explanation: string;
   ai_confidence: number;
   reviewed_by: number | null;
+  reviewed_at: string | null;
+  override_score: number | null;
+  override_level: RiskResult["level"] | null;
+  override_note: string | null;
   created_at: string;
 }
 
@@ -84,6 +89,15 @@ interface ExtractedEntityApiResponse {
   negated: boolean;
 }
 
+interface ClinicalNoteApiResponse {
+  id: string;
+  patient_id: string;
+  doctor_id: number | null;
+  doctor_name: string | null;
+  note: string;
+  created_at: string;
+}
+
 /* =========================================================
    MAPPING
 ========================================================= */
@@ -106,6 +120,10 @@ function toRiskResult(r: RiskAssessmentApiResponse): RiskResult {
     explanation: r.explanation,
     modelConfidence: Number(r.ai_confidence),
     reviewedBy: r.reviewed_by,
+    reviewedAt: r.reviewed_at,
+    overrideScore: r.override_score !== null ? Number(r.override_score) : null,
+    overrideLevel: r.override_level,
+    overrideNote: r.override_note,
   };
 }
 
@@ -153,6 +171,17 @@ function toExtractedEntity(e: ExtractedEntityApiResponse): ExtractedEntity {
     entityValue: e.entity_value,
     confidence: e.confidence,
     negated: e.negated,
+  };
+}
+
+function toClinicalNote(n: ClinicalNoteApiResponse): ClinicalNote {
+  return {
+    id: n.id,
+    patientId: n.patient_id,
+    doctorId: n.doctor_id,
+    doctorName: n.doctor_name,
+    note: n.note,
+    createdAt: n.created_at,
   };
 }
 
@@ -294,6 +323,25 @@ export async function getRiskResult(intakeId: string): Promise<RiskResult> {
 }
 
 /* =========================================================
+   REVUE CLINIQUE — POST /api/risk/{intake_id}/review (doctor/admin)
+   Confirme le score IA tel quel (overrideScore/overrideLevel = null),
+   ou l'ajuste. Alimente le journal d'audit côté Administration.
+========================================================= */
+
+export async function reviewRiskAssessment(
+  intakeId: string,
+  override: { score: number | null; level: RiskLevel | null; note: string }
+): Promise<RiskResult> {
+  const body = {
+    override_score: override.score,
+    override_level: override.level,
+    note: override.note,
+  };
+  const { data } = await api.post<RiskAssessmentApiResponse>(`/risk/${intakeId}/review`, body);
+  return toRiskResult(data);
+}
+
+/* =========================================================
    GET EXTRACTED ENTITIES (résultat NLP)
    GET /api/patients/intake/{intake_id}/entities
 ========================================================= */
@@ -303,4 +351,23 @@ export async function getIntakeEntities(intakeId: string): Promise<ExtractedEnti
     `/patients/intake/${intakeId}/entities`
   );
   return data.map(toExtractedEntity);
+}
+
+/* =========================================================
+   NOTES CLINIQUES
+   GET  /api/patients/{patient_id}/notes  (lecture : patient + médecin/admin)
+   POST /api/patients/{patient_id}/notes  (écriture : médecin/admin uniquement)
+========================================================= */
+
+export async function getClinicalNotes(patientId: string): Promise<ClinicalNote[]> {
+  const { data } = await api.get<ClinicalNoteApiResponse[]>(`/patients/${patientId}/notes`);
+  return data.map(toClinicalNote);
+}
+
+export async function createClinicalNote(patientId: string, note: string): Promise<ClinicalNote> {
+  if (!note.trim()) throw new Error("La note ne peut pas être vide.");
+  const { data } = await api.post<ClinicalNoteApiResponse>(`/patients/${patientId}/notes`, {
+    note: note.trim(),
+  });
+  return toClinicalNote(data);
 }

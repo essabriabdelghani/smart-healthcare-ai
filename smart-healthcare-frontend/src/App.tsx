@@ -7,8 +7,11 @@ import DashboardPage from "./pages/DashboardPage";
 import PatientFormPage from "./pages/PatientFormPage";
 import DoctorDashboardPage from "./pages/DoctorDashboardPage";
 import AddPatientPage from "./pages/AddPatientPage";
+import AppointmentsPage from "./pages/AppointmentsPage";
 import RiskResultPage from "./pages/RiskResultPage";
 import AdminPanelPage from "./pages/AdminPanelPage";
+import SettingsPage from "./pages/SettingsPage";
+import SupportPage from "./pages/SupportPage";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import RoleHomeRedirect from "./components/RoleHomeRedirect";
@@ -61,13 +64,26 @@ function App() {
         }
       />
 
-      {/* Ajouter un patient (admission directe) : médecin/admin uniquement */}
+      {/* Ajouter un patient (admission directe) : médecin uniquement */}
       <Route
         path="/doctor/patients/new"
         element={
-          <ProtectedRoute allowedRoles={["doctor", "admin"]}>
+          <ProtectedRoute allowedRoles={["doctor"]}>
             <Layout>
               <AddPatientPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Rendez-vous (création + gestion) : médecin uniquement.
+          L'admin voit tous les rendez-vous en lecture seule dans /admin. */}
+      <Route
+        path="/doctor/appointments"
+        element={
+          <ProtectedRoute allowedRoles={["doctor"]}>
+            <Layout>
+              <AppointmentsPage />
             </Layout>
           </ProtectedRoute>
         }
@@ -92,6 +108,28 @@ function App() {
           <ProtectedRoute allowedRoles={["admin"]}>
             <Layout>
               <AdminPanelPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Paramètres et Support : accessibles à tout utilisateur connecté */}
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <SettingsPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/support"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <SupportPage />
             </Layout>
           </ProtectedRoute>
         }

@@ -7,7 +7,9 @@ from sqlalchemy import (
     DateTime,
     Enum,
     Boolean,
+    ForeignKey,
 )
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from app.database import Base
@@ -52,6 +54,15 @@ class User(Base):
         default=UserRole.patient,
     )
 
+    # Chaque compte (patient, médecin ou admin) appartient à une clinique.
+    # C'est la clé de partitionnement qui empêche un médecin de voir les
+    # patients d'une autre clinique.
+    clinic_id = Column(
+        String(36),
+        ForeignKey("clinics.id", ondelete="RESTRICT"),
+        nullable=False,
+    )
+
     phone = Column(
         String(20),
         nullable=True,
@@ -75,3 +86,9 @@ class User(Base):
         onupdate=func.now(),
         nullable=False,
     )
+
+    clinic = relationship("Clinic")
+
+    @property
+    def clinic_name(self) -> str | None:
+        return self.clinic.name if self.clinic else None

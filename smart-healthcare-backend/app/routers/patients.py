@@ -19,6 +19,14 @@ router = APIRouter(
 )
 
 
+def _can_access_patient(patient: Patient, current_user: User) -> bool:
+    """Un patient ne voit que son propre dossier. Un médecin/admin ne voit
+    que les dossiers de SA clinique (pas ceux des autres cliniques)."""
+    if current_user.role == "patient":
+        return patient.user_id == current_user.id
+    return patient.clinic_id == current_user.clinic_id
+
+
 # ==========================
 # Create Patient
 # ==========================
@@ -44,6 +52,7 @@ def create_patient(
     patient = Patient(
         user_id=current_user.id,
         created_by=current_user.id,
+        clinic_id=current_user.clinic_id,
         first_name=payload.first_name,
         last_name=payload.last_name,
         gender=payload.gender,
@@ -93,11 +102,12 @@ def get_patients(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    # Un patient ne doit voir que son propre profil, pas ceux des autres.
+    # Un patient ne voit que son propre profil.
     if current_user.role == "patient":
         return db.query(Patient).filter(Patient.user_id == current_user.id).all()
 
-    return db.query(Patient).all()
+    # Un médecin/admin ne voit que les patients de SA clinique.
+    return db.query(Patient).filter(Patient.clinic_id == current_user.clinic_id).all()
 
 
 # ==========================
@@ -121,7 +131,7 @@ def get_patient(
             detail="Patient not found",
         )
 
-    if current_user.role == "patient" and patient.user_id != current_user.id:
+    if not _can_access_patient(patient, current_user):
         raise HTTPException(status_code=403, detail="Not allowed to access this record")
 
     return patient
@@ -149,7 +159,7 @@ def update_patient(
             detail="Patient not found",
         )
 
-    if current_user.role == "patient" and patient.user_id != current_user.id:
+    if not _can_access_patient(patient, current_user):
         raise HTTPException(status_code=403, detail="Not allowed to modify this record")
 
     update_data = payload.model_dump(exclude_unset=True)
@@ -184,7 +194,7 @@ def delete_patient(
             detail="Patient not found",
         )
 
-    if current_user.role == "patient" and patient.user_id != current_user.id:
+    if not _can_access_patient(patient, current_user):
         raise HTTPException(status_code=403, detail="Not allowed to delete this record")
 
     db.delete(patient)

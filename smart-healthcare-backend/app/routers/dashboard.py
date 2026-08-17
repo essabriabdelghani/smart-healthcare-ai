@@ -8,7 +8,8 @@ from app.models.user import User
 from app.models.patient import Patient
 from app.models.patient_intake import PatientIntake
 from app.models.risk_assessment import RiskAssessment, RiskLevel
-from app.schemas.dashboard import DoctorPatientRow
+from app.schemas.dashboard import DoctorPatientRow, DashboardStatsOut
+from app.schemas.risk import AuditLogEntry
 
 router = APIRouter(
     prefix="/dashboard",
@@ -35,6 +36,7 @@ def doctor_patients(
         db.query(PatientIntake, Patient, RiskAssessment)
         .join(Patient, Patient.id == PatientIntake.patient_id)
         .outerjoin(RiskAssessment, RiskAssessment.intake_id == PatientIntake.id)
+        .filter(Patient.clinic_id == current_user.clinic_id)
         .order_by(PatientIntake.created_at.desc())
         .all()
     )
@@ -59,38 +61,94 @@ def doctor_patients(
     ]
 
 
-@router.get("/stats")
+@router.get("/audit-log", response_model=list[AuditLogEntry])
+def audit_log(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Historique réel des revues cliniques : confirmations et ajustements
+    du score IA par les médecins de la clinique."""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only admins can access the audit log")
+
+    rows = (
+        db.query(RiskAssessment, PatientIntake, Patient, User)
+        .join(PatientIntake, PatientIntake.id == RiskAssessment.intake_id)
+        .join(Patient, Patient.id == PatientIntake.patient_id)
+        .outerjoin(User, User.id == RiskAssessment.reviewed_by)
+        .filter(Patient.clinic_id == current_user.clinic_id, RiskAssessment.reviewed_at.isnot(None))
+        .order_by(RiskAssessment.reviewed_at.desc())
+        .limit(50)
+        .all()
+    )
+
+    return [
+        AuditLogEntry(
+            intake_id=intake.id,
+            patient_name=f"{patient.first_name} {patient.last_name}",
+            doctor_name=doctor.full_name if doctor else None,
+            ai_score=float(assessment.risk_score),
+            ai_level=assessment.risk_level,
+            override_score=float(assessment.override_score) if assessment.override_score is not None else None,
+            override_level=assessment.override_level,
+            was_modified=assessment.override_score is not None or assessment.override_level is not None,
+            reviewed_at=assessment.reviewed_at,
+        )
+        for assessment, intake, patient, doctor in rows
+    ]
+
+
+@router.get("/stats", response_model=DashboardStatsOut)
 def dashboard_stats(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
 
-    total_patients = db.query(Patient).count()
+    total_patients = db.query(Patient).filter(Patient.clinic_id == current_user.clinic_id).count()
 
-    total_intakes = db.query(PatientIntake).count()
+    total_users = db.query(User).filter(User.clinic_id == current_user.clinic_id).count()
 
-    total_assessments = db.query(RiskAssessment).count()
+    doctors_count = (
+        db.query(User)
+        .filter(User.clinic_id == current_user.clinic_id, User.role == "doctor")
+        .count()
+    )
 
-    low = db.query(RiskAssessment).filter(
-        RiskAssessment.risk_level == RiskLevel.low
-    ).count()
+    total_intakes = (
+        db.query(PatientIntake)
+        .join(Patient, Patient.id == PatientIntake.patient_id)
+        .filter(Patient.clinic_id == current_user.clinic_id)
+        .count()
+    )
 
-    medium = db.query(RiskAssessment).filter(
-        RiskAssessment.risk_level == RiskLevel.medium
-    ).count()
+    total_assessments = (
+        db.query(RiskAssessment)
+        .join(PatientIntake, PatientIntake.id == RiskAssessment.intake_id)
+        .join(Patient, Patient.id == PatientIntake.patient_id)
+        .filter(Patient.clinic_id == current_user.clinic_id)
+        .count()
+    )
 
-    high = db.query(RiskAssessment).filter(
-        RiskAssessment.risk_level == RiskLevel.high
-    ).count()
+    def _count_by_level(level: RiskLevel) -> int:
+        return (
+            db.query(RiskAssessment)
+            .join(PatientIntake, PatientIntake.id == RiskAssessment.intake_id)
+            .join(Patient, Patient.id == PatientIntake.patient_id)
+            .filter(Patient.clinic_id == current_user.clinic_id, RiskAssessment.risk_level == level)
+            .count()
+        )
 
-    critical = db.query(RiskAssessment).filter(
-        RiskAssessment.risk_level == RiskLevel.critical
-    ).count()
+    low = _count_by_level(RiskLevel.low)
+    medium = _count_by_level(RiskLevel.medium)
+    high = _count_by_level(RiskLevel.high)
+    critical = _count_by_level(RiskLevel.critical)
 
     return {
         "total_patients": total_patients,
         "total_intakes": total_intakes,
         "total_assessments": total_assessments,
+        "total_users": total_users,
+        "doctors_count": doctors_count,
         "low_risk": low,
         "medium_risk": medium,
         "high_risk": high,

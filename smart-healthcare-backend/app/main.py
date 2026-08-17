@@ -10,6 +10,9 @@ from app.routers import (
     patient_intake,
     risk,
     dashboard,
+    clinical_notes,
+    appointments,
+    users,
 )
 
 Base.metadata.create_all(bind=engine)
@@ -32,6 +35,9 @@ app.include_router(patient_intake.router, prefix="/api")
 app.include_router(patients.router, prefix="/api")
 app.include_router(risk.router, prefix="/api")
 app.include_router(dashboard.router, prefix="/api")
+app.include_router(clinical_notes.router, prefix="/api")
+app.include_router(appointments.router, prefix="/api")
+app.include_router(users.router, prefix="/api")
 
 
 @app.get("/api/health")

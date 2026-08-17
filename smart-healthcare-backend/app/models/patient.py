@@ -30,6 +30,14 @@ class Patient(Base):
         nullable=True,
     )
 
+    # Même clinique que le compte créateur — c'est CE champ qui isole les
+    # patients d'une clinique par rapport aux autres dans le dashboard médecin.
+    clinic_id = Column(
+        String(36),
+        ForeignKey("clinics.id", ondelete="RESTRICT"),
+        nullable=False,
+    )
+
     first_name = Column(String(100), nullable=False)
     last_name = Column(String(100), nullable=False)
     gender = Column(String(20), nullable=False)

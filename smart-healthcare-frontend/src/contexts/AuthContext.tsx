@@ -21,7 +21,8 @@ interface AuthContextValue {
     full_name: string,
     email: string,
     password: string,
-    role: UserRole
+    role: UserRole,
+    clinic_name: string
   ) => Promise<User>;
 
   logout: () => void;
@@ -93,13 +94,15 @@ export function AuthProvider({
       full_name: string,
       email: string,
       password: string,
-      role: UserRole
+      role: UserRole,
+      clinic_name: string
     ) => {
       await authService.register({
         full_name,
         email,
         password,
         role,
+        clinic_name,
       });
 
       await authService.login({
