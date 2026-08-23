@@ -20,7 +20,7 @@ export default function LoginPage() {
     setError(null);
 
     if (!email.trim() || !password.trim()) {
-      setError("Veuillez remplir tous les champs.");
+      setError("Please fill in all fields.");
       return;
     }
 
@@ -33,7 +33,7 @@ export default function LoginPage() {
     } catch (err: any) {
       setError(
         err?.response?.data?.detail ??
-          "Adresse e-mail ou mot de passe incorrect."
+          "Incorrect email address or password."
       );
     } finally {
       setLoading(false);
@@ -52,11 +52,11 @@ export default function LoginPage() {
           />
 
           <h1 className="font-display text-3xl text-pine">
-            Se connecter
+            Sign in
           </h1>
 
           <p className="mt-2 text-sm text-ink-soft">
-            Accédez à votre espace clinique numérique.
+            Access your digital clinical space.
           </p>
         </div>
 
@@ -69,7 +69,7 @@ export default function LoginPage() {
 
             <label className="block">
               <span className="text-xs font-medium uppercase tracking-wide text-ink-soft">
-                E-mail
+                Email
               </span>
 
               <input
@@ -84,7 +84,7 @@ export default function LoginPage() {
 
             <label className="block">
               <span className="text-xs font-medium uppercase tracking-wide text-ink-soft">
-                Mot de passe
+                Password
               </span>
 
               <input
@@ -108,7 +108,7 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full rounded-lg bg-pine px-4 py-2.5 font-medium text-paper transition-colors hover:bg-pine-dark disabled:opacity-60"
             >
-              {loading ? "Connexion..." : "Se connecter"}
+              {loading ? "Signing in..." : "Sign in"}
             </button>
 
           </div>
@@ -121,14 +121,14 @@ export default function LoginPage() {
             to="/forgot-password"
             className="text-ink-soft hover:text-pine"
           >
-            Mot de passe oublié ?
+            Forgot password?
           </Link>
 
           <Link
             to="/register"
             className="font-medium text-pine hover:text-pine-dark"
           >
-            Créer un compte →
+            Create account →
           </Link>
 
         </div>

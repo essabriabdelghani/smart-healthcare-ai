@@ -31,11 +31,11 @@ export default function SettingsPage() {
     try {
       await authService.updateProfile({ full_name: fullName, phone });
       await refreshUser();
-      setProfileMessage("Profil mis à jour.");
+      setProfileMessage("Profile updated.");
     } catch (err: unknown) {
       const apiMessage = (err as { response?: { data?: { detail?: unknown } } })?.response?.data
         ?.detail;
-      setProfileError(typeof apiMessage === "string" ? apiMessage : "Impossible de mettre à jour le profil.");
+      setProfileError(typeof apiMessage === "string" ? apiMessage : "Unable to update profile.");
     } finally {
       setProfileSaving(false);
     }
@@ -47,11 +47,11 @@ export default function SettingsPage() {
     setPasswordMessage(null);
 
     if (newPassword.length < 8) {
-      setPasswordError("Le nouveau mot de passe doit contenir au moins 8 caractères.");
+      setPasswordError("New password must be at least 8 characters long.");
       return;
     }
     if (newPassword !== confirmPassword) {
-      setPasswordError("Les deux mots de passe ne correspondent pas.");
+      setPasswordError("The two passwords do not match.");
       return;
     }
 
@@ -61,14 +61,14 @@ export default function SettingsPage() {
         current_password: currentPassword,
         new_password: newPassword,
       });
-      setPasswordMessage("Mot de passe mis à jour.");
+      setPasswordMessage("Password updated.");
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
     } catch (err: unknown) {
       const apiMessage = (err as { response?: { data?: { detail?: unknown } } })?.response?.data
         ?.detail;
-      setPasswordError(typeof apiMessage === "string" ? apiMessage : "Impossible de changer le mot de passe.");
+      setPasswordError(typeof apiMessage === "string" ? apiMessage : "Unable to change password.");
     } finally {
       setPasswordSaving(false);
     }
@@ -77,15 +77,15 @@ export default function SettingsPage() {
   return (
     <div className="mx-auto max-w-xl">
       <div className="mb-8">
-        <span className="text-xs font-medium uppercase tracking-widest text-brass">Compte</span>
-        <h1 className="font-display text-4xl text-pine">Paramètres</h1>
+        <span className="text-xs font-medium uppercase tracking-widest text-brass">Account</span>
+        <h1 className="font-display text-4xl text-pine">Settings</h1>
       </div>
 
       <div className="rounded-2xl border border-sand-dark/60 bg-paper-raised p-6 shadow-sm">
-        <h2 className="font-display text-lg text-pine">Profil</h2>
+        <h2 className="font-display text-lg text-pine">Profile</h2>
         <form onSubmit={handleProfileSubmit} className="mt-4 space-y-4">
           <label className="block">
-            <span className={labelClass}>Nom complet</span>
+            <span className={labelClass}>Full name</span>
             <input
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
@@ -95,7 +95,7 @@ export default function SettingsPage() {
           </label>
 
           <label className="block">
-            <span className={labelClass}>Téléphone</span>
+            <span className={labelClass}>Phone</span>
             <input
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
@@ -105,7 +105,7 @@ export default function SettingsPage() {
           </label>
 
           <label className="block">
-            <span className={labelClass}>E-mail</span>
+            <span className={labelClass}>Email</span>
             <input value={user?.email ?? ""} disabled className={`${fieldClass} opacity-60`} />
           </label>
 
@@ -117,16 +117,16 @@ export default function SettingsPage() {
             disabled={profileSaving}
             className="rounded-lg bg-pine px-4 py-2 text-sm font-medium text-paper transition-colors hover:bg-pine-dark disabled:opacity-60"
           >
-            {profileSaving ? "Enregistrement..." : "Enregistrer"}
+            {profileSaving ? "Saving..." : "Save"}
           </button>
         </form>
       </div>
 
       <div className="mt-6 rounded-2xl border border-sand-dark/60 bg-paper-raised p-6 shadow-sm">
-        <h2 className="font-display text-lg text-pine">Mot de passe</h2>
+        <h2 className="font-display text-lg text-pine">Password</h2>
         <form onSubmit={handlePasswordSubmit} className="mt-4 space-y-4">
           <label className="block">
-            <span className={labelClass}>Mot de passe actuel</span>
+            <span className={labelClass}>Current password</span>
             <input
               type="password"
               value={currentPassword}
@@ -137,7 +137,7 @@ export default function SettingsPage() {
           </label>
 
           <label className="block">
-            <span className={labelClass}>Nouveau mot de passe</span>
+            <span className={labelClass}>New password</span>
             <input
               type="password"
               value={newPassword}
@@ -149,7 +149,7 @@ export default function SettingsPage() {
           </label>
 
           <label className="block">
-            <span className={labelClass}>Confirmer le nouveau mot de passe</span>
+            <span className={labelClass}>Confirm new password</span>
             <input
               type="password"
               value={confirmPassword}
@@ -168,7 +168,7 @@ export default function SettingsPage() {
             disabled={passwordSaving}
             className="rounded-lg bg-pine px-4 py-2 text-sm font-medium text-paper transition-colors hover:bg-pine-dark disabled:opacity-60"
           >
-            {passwordSaving ? "Enregistrement..." : "Changer le mot de passe"}
+            {passwordSaving ? "Saving..." : "Change password"}
           </button>
         </form>
       </div>

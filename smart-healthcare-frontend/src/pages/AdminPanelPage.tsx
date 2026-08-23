@@ -8,7 +8,7 @@ import type { User, UserRole } from "../types/user";
 type RoleFilter = "all" | UserRole;
 
 /* =========================================================
-   Icônes — cohérentes avec celles de la sidebar (Layout.tsx)
+   Icons — consistent with those in the sidebar (Layout.tsx)
 ========================================================= */
 
 const iconBase = {
@@ -66,7 +66,7 @@ function IconCalendar({ className }: { className?: string }) {
 ========================================================= */
 
 function formatDateTime(iso: string): string {
-  return new Date(iso).toLocaleString("fr-FR", {
+  return new Date(iso).toLocaleString("en-US", {
     day: "2-digit",
     month: "short",
     hour: "2-digit",
@@ -83,10 +83,10 @@ const borderByRisk: Record<RiskLevel | "none", string> = {
 };
 
 const statusLabel: Record<string, string> = {
-  scheduled: "Prévu",
-  completed: "Terminé",
-  cancelled: "Annulé",
-  no_show: "Absent",
+  scheduled: "Scheduled",
+  completed: "Completed",
+  cancelled: "Cancelled",
+  no_show: "No show",
 };
 
 const statusStyle: Record<string, string> = {
@@ -103,20 +103,20 @@ const roleBadgeStyle: Record<UserRole, string> = {
 };
 
 const roleBadgeLabel: Record<UserRole, string> = {
-  doctor: "Médecin",
+  doctor: "Doctor",
   patient: "Patient",
   admin: "Admin",
 };
 
 const riskLabel: Record<RiskLevel, string> = {
-  low: "faible",
-  medium: "modéré",
-  high: "élevé",
-  critical: "critique",
+  low: "low",
+  medium: "moderate",
+  high: "high",
+  critical: "critical",
 };
 
 /* =========================================================
-   Petits composants
+   Small components
 ========================================================= */
 
 function StatCard({
@@ -195,7 +195,7 @@ export default function AdminPanelPage() {
         setAuditLog(a);
         setAppointments(appts);
       })
-      .catch(() => setError("Impossible de charger les données d'administration."))
+      .catch(() => setError("Unable to load administration data."))
       .finally(() => setLoading(false));
   }, []);
 
@@ -212,7 +212,7 @@ export default function AdminPanelPage() {
     } catch (err: unknown) {
       const apiMessage = (err as { response?: { data?: { detail?: unknown } } })?.response?.data
         ?.detail;
-      alert(typeof apiMessage === "string" ? apiMessage : "Action impossible.");
+      alert(typeof apiMessage === "string" ? apiMessage : "Action failed.");
     } finally {
       setBusyUserId(null);
     }
@@ -226,8 +226,8 @@ export default function AdminPanelPage() {
         </span>
         <h1 className="font-display text-4xl text-pine">Administration</h1>
         <p className="mt-2 text-ink-soft">
-          Vue d'ensemble en lecture seule de la clinique — patients, rendez-vous, équipe et
-          historique des décisions cliniques.
+          Read-only overview of the clinic — patients, appointments, team and
+          clinical decision history.
         </p>
       </div>
 
@@ -237,18 +237,18 @@ export default function AdminPanelPage() {
         </div>
       )}
 
-      {/* Stats — les 3 premières filtrent la table Utilisateurs */}
+      {/* Stats — the first 3 filter the Users table */}
       <div className="grid gap-3 sm:grid-cols-4">
         <StatCard
           icon={<IconUsers className="h-5 w-5" />}
-          label="Utilisateurs"
+          label="Users"
           value={stats?.totalUsers ?? 0}
           active={roleFilter === "all"}
           onClick={() => setRoleFilter("all")}
         />
         <StatCard
           icon={<IconStethoscope className="h-5 w-5" />}
-          label="Médecins"
+          label="Doctors"
           value={stats?.doctorsCount ?? 0}
           active={roleFilter === "doctor"}
           onClick={() => setRoleFilter("doctor")}
@@ -262,41 +262,41 @@ export default function AdminPanelPage() {
         />
         <StatCard
           icon={<IconCalendar className="h-5 w-5" />}
-          label="Rendez-vous"
+          label="Appointments"
           value={appointments.length}
           active={false}
         />
       </div>
 
-      {/* Utilisateurs et rôles */}
+      {/* Users and roles */}
       <div className="mt-10">
         <div className="flex items-center justify-between">
-          <SectionHeading title="Utilisateurs et rôles" />
+          <SectionHeading title="Users and roles" />
           {roleFilter !== "all" && (
             <button
               onClick={() => setRoleFilter("all")}
               className="mb-4 text-xs font-medium text-ink-soft hover:text-pine"
             >
-              Réinitialiser le filtre ✕
+              Reset filter ✕
             </button>
           )}
         </div>
 
         {loading ? (
-          <p className="text-sm text-ink-soft">Chargement...</p>
+          <p className="text-sm text-ink-soft">Loading...</p>
         ) : filteredUsers.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-sand-dark bg-paper-raised px-6 py-10 text-center">
-            <p className="text-sm text-ink-soft">Aucun utilisateur pour ce filtre.</p>
+            <p className="text-sm text-ink-soft">No users for this filter.</p>
           </div>
         ) : (
           <div className="overflow-hidden rounded-2xl border border-sand-dark/60 bg-paper-raised shadow-sm">
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-sand-dark/60 text-xs uppercase tracking-wide text-ink-soft">
-                  <th className="px-5 py-3 font-medium">Nom</th>
-                  <th className="px-5 py-3 font-medium">E-mail</th>
-                  <th className="px-5 py-3 font-medium">Rôle</th>
-                  <th className="px-5 py-3 font-medium">Statut</th>
+                  <th className="px-5 py-3 font-medium">Name</th>
+                  <th className="px-5 py-3 font-medium">Email</th>
+                  <th className="px-5 py-3 font-medium">Role</th>
+                  <th className="px-5 py-3 font-medium">Status</th>
                   <th className="px-5 py-3"></th>
                 </tr>
               </thead>
@@ -326,7 +326,7 @@ export default function AdminPanelPage() {
                             u.is_active ? "bg-risk-low" : "bg-risk-critical"
                           }`}
                         />
-                        {u.is_active ? "Actif" : "Désactivé"}
+                        {u.is_active ? "Active" : "Disabled"}
                       </span>
                     </td>
                     <td className="px-5 py-3 text-right">
@@ -335,7 +335,7 @@ export default function AdminPanelPage() {
                         disabled={busyUserId === u.id}
                         className="text-xs font-medium text-pine hover:text-pine-dark disabled:opacity-50"
                       >
-                        {busyUserId === u.id ? "..." : u.is_active ? "Désactiver" : "Activer"}
+                        {busyUserId === u.id ? "..." : u.is_active ? "Disable" : "Activate"}
                       </button>
                     </td>
                   </tr>
@@ -346,15 +346,15 @@ export default function AdminPanelPage() {
         )}
       </div>
 
-      {/* Tous les rendez-vous */}
+      {/* All appointments */}
       <div className="mt-10">
-        <SectionHeading title="Tous les rendez-vous" />
+        <SectionHeading title="All appointments" />
 
         {loading ? (
-          <p className="text-sm text-ink-soft">Chargement...</p>
+          <p className="text-sm text-ink-soft">Loading...</p>
         ) : appointments.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-sand-dark bg-paper-raised px-6 py-10 text-center">
-            <p className="text-sm text-ink-soft">Aucun rendez-vous programmé pour le moment.</p>
+            <p className="text-sm text-ink-soft">No appointments scheduled at the moment.</p>
           </div>
         ) : (
           <div className="max-h-96 space-y-2 overflow-y-auto pr-1">
@@ -389,20 +389,20 @@ export default function AdminPanelPage() {
         )}
       </div>
 
-      {/* Journal d'audit — réel, alimenté par les revues cliniques */}
+      {/* Audit log — real, populated by clinical reviews */}
       <div className="mt-10">
-        <SectionHeading title="Journal d'audit — IA versus clinicien" />
+        <SectionHeading title="Audit log — AI versus clinician" />
 
         {loading ? (
-          <p className="text-sm text-ink-soft">Chargement...</p>
+          <p className="text-sm text-ink-soft">Loading...</p>
         ) : auditLog.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-sand-dark bg-paper-raised px-6 py-10 text-center">
             <p className="text-sm text-ink-soft">
-              Aucune revue clinique enregistrée pour le moment.
+              No clinical reviews recorded at the moment.
             </p>
             <p className="mt-1 text-xs text-ink-soft">
-              Ce journal se remplit quand un médecin confirme ou ajuste un score depuis la fiche
-              patient.
+              This log fills up when a doctor confirms or adjusts a score from the patient
+              record.
             </p>
           </div>
         ) : (
@@ -425,20 +425,20 @@ export default function AdminPanelPage() {
                   </span>
                   <div>
                     <p className="text-sm text-ink">
-                      {entry.doctorName ? `Dr. ${entry.doctorName}` : "Un médecin"}{" "}
-                      {entry.wasModified ? "a ajusté le score de " : "a confirmé le score de "}
+                      {entry.doctorName ? `Dr. ${entry.doctorName}` : "A doctor"}{" "}
+                      {entry.wasModified ? "adjusted the score of " : "confirmed the score of "}
                       <span className="font-medium">{entry.patientName}</span>
                     </p>
                     <p className="mt-0.5 text-xs text-ink-soft">
                       {entry.wasModified ? (
                         <>
-                          Score IA : {entry.aiScore} ({riskLabel[entry.aiLevel]}) → ajusté :{" "}
+                          AI score: {entry.aiScore} ({riskLabel[entry.aiLevel]}) → adjusted:{" "}
                           {entry.overrideScore ?? entry.aiScore}
                           {entry.overrideLevel ? ` (${riskLabel[entry.overrideLevel]})` : ""}
                         </>
                       ) : (
                         <>
-                          Score IA : {entry.aiScore} ({riskLabel[entry.aiLevel]}) — aucune
+                          AI score: {entry.aiScore} ({riskLabel[entry.aiLevel]}) — no
                           modification
                         </>
                       )}

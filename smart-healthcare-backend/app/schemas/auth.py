@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, EmailStr, ConfigDict, field_validator
+from pydantic import BaseModel, EmailStr, ConfigDict, field_validator, Field
 
 from app.models.user import UserRole
 
@@ -105,6 +105,8 @@ class PasswordChange(BaseModel):
             raise ValueError("Password must contain at least 8 characters")
         return value
 
+       
+
 
 # ======================================
 # JWT Token
@@ -117,3 +119,9 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     user_id: str | None = None
+
+
+# Zid f lakhir dyal fichier
+class ResetPassword(BaseModel):
+    token: str
+    new_password: str = Field(min_length=8)    

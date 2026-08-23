@@ -3,10 +3,11 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { roleHome } from "../utils/roleHome";
 import { VitalLine } from "./VitalLine";
+import { NotificationBell } from "./NotificationBell";
 import type { UserRole } from "../types/user";
 
 /* =========================================================
-   Icônes — SVG inline (pas de dépendance à une police externe)
+   Icons — inline SVG (no dependency on external fonts)
 ========================================================= */
 
 type IconProps = SVGProps<SVGSVGElement>;
@@ -100,28 +101,29 @@ function IconLogout(props: IconProps) {
 }
 
 const iconByLabel: Record<string, (props: IconProps) => ReactElement> = {
-  "Tableau de bord": IconDashboard,
-  "Mes admissions": IconDashboard,
-  Patients: IconUsers,
-  "Nouvelle admission": IconFilePlus,
-  "Ajouter un patient": IconFilePlus,
-  "Rendez-vous": IconCalendar,
-  Administration: IconShieldLock,
+  "Dashboard": IconDashboard,
+  "My admissions": IconDashboard,
+  "Patients": IconUsers,
+  "New admission": IconFilePlus,
+  "Add patient": IconFilePlus,
+  "Appointments": IconCalendar,
+  "Administration": IconShieldLock,
 };
 
 /* =========================================================
-   Navigation par rôle
+   Role-based navigation
 ========================================================= */
 
 const navItemsByRole: Record<UserRole, { to: string; label: string }[]> = {
   patient: [
-    { to: "/dashboard", label: "Mes admissions" },
-    { to: "/patient-form", label: "Nouvelle admission" },
+    { to: "/dashboard", label: "My admissions" },
+    { to: "/patient-form", label: "New admission" },
+    { to: "/my-appointments", label: "My appointments" },
   ],
   doctor: [
     { to: "/doctor/dashboard", label: "Patients" },
-    { to: "/doctor/patients/new", label: "Ajouter un patient" },
-    { to: "/doctor/appointments", label: "Rendez-vous" },
+    { to: "/doctor/patients/new", label: "Add patient" },
+    { to: "/doctor/appointments", label: "Appointments" },
   ],
   admin: [
     { to: "/doctor/dashboard", label: "Patients" },
@@ -144,20 +146,23 @@ export function Layout({ children }: { children: ReactNode }) {
 
   const roleLabel: Record<UserRole, string> = {
     patient: "Patient",
-    doctor: "Médecin",
-    admin: "Administrateur",
+    doctor: "Doctor",
+    admin: "Administrator",
   };
 
   return (
     <div className="flex h-screen overflow-hidden bg-paper">
-      {/* ============ Sidebar (fixe, ne défile jamais avec le contenu) ============ */}
+      {/* ============ Sidebar (fixed, never scrolls with content) ============ */}
       <aside className="hidden h-screen w-56 shrink-0 flex-col overflow-y-auto bg-pine px-3 py-4 lg:flex">
-        <Link to={homeTo} className="mb-2 flex items-center gap-2 border-b border-white/10 px-2 pb-5">
-          <VitalLine className="h-4 w-8 text-brass" strokeWidth={2.5} />
-          <span className="font-display text-sm text-paper">
-            Clinique&nbsp;<span className="italic">Numérique</span>
-          </span>
-        </Link>
+        <div className="mb-2 flex items-center justify-between gap-2 border-b border-white/10 px-2 pb-5">
+          <Link to={homeTo} className="flex min-w-0 items-center gap-2">
+            <VitalLine className="h-4 w-8 shrink-0 text-brass" strokeWidth={2.5} />
+            <span className="truncate font-display text-sm text-paper">
+              Digital&nbsp;<span className="italic">Clinic</span>
+            </span>
+          </Link>
+          <NotificationBell dark />
+        </div>
 
         <nav className="flex flex-1 flex-col gap-0.5">
           {navItems.map((item) => {
@@ -189,7 +194,7 @@ export function Layout({ children }: { children: ReactNode }) {
               }`}
             >
               <IconSettings className="h-[15px] w-[15px] shrink-0" />
-              Paramètres
+              Settings
             </Link>
             <Link
               to="/support"
@@ -219,7 +224,7 @@ export function Layout({ children }: { children: ReactNode }) {
                 logout();
                 navigate("/login");
               }}
-              aria-label="Déconnexion"
+              aria-label="Logout"
               className="shrink-0 text-sage-light/70 transition-colors hover:text-paper"
             >
               <IconLogout className="h-[15px] w-[15px]" />
@@ -228,22 +233,25 @@ export function Layout({ children }: { children: ReactNode }) {
         )}
       </aside>
 
-      {/* ============ Nav mobile (sidebar cachée < lg) ============ */}
+      {/* ============ Mobile nav (sidebar hidden < lg) ============ */}
       <div className="flex h-screen flex-1 flex-col overflow-hidden">
         <header className="shrink-0 flex items-center justify-between border-b border-sand-dark/60 bg-paper-raised px-4 py-3 lg:hidden">
           <Link to={homeTo} className="flex items-center gap-2">
             <VitalLine className="h-4 w-8 text-brass" strokeWidth={2.5} />
-            <span className="font-display text-sm text-pine">Clinique Numérique</span>
+            <span className="font-display text-sm text-pine">Digital Clinic</span>
           </Link>
-          <button
-            onClick={() => {
-              logout();
-              navigate("/login");
-            }}
-            className="text-xs font-medium text-ink-soft"
-          >
-            Déconnexion
-          </button>
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+            <button
+              onClick={() => {
+                logout();
+                navigate("/login");
+              }}
+              className="text-xs font-medium text-ink-soft"
+            >
+              Logout
+            </button>
+          </div>
         </header>
 
         <nav className="shrink-0 flex gap-1 overflow-x-auto border-b border-sand-dark/60 bg-paper-raised px-3 py-2 lg:hidden">
@@ -263,7 +271,7 @@ export function Layout({ children }: { children: ReactNode }) {
           })}
         </nav>
 
-        {/* Seule cette zone défile — sidebar et en-têtes restent fixes */}
+        {/* Only this area scrolls — sidebar and headers stay fixed */}
         <main className="flex-1 overflow-y-auto px-6 py-8 lg:px-10 lg:py-10">{children}</main>
       </div>
     </div>

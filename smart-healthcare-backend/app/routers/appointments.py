@@ -11,6 +11,7 @@ from app.models.patient import Patient
 from app.models.patient_intake import PatientIntake
 from app.models.risk_assessment import RiskAssessment
 from app.models.appointment import Appointment
+from app.models.notification import Notification
 
 from app.schemas.appointment import AppointmentCreate, AppointmentOut, DoctorOption
 
@@ -94,6 +95,28 @@ def list_clinic_doctors(
         .all()
     )
     return [DoctorOption(id=d.id, full_name=d.full_name) for d in doctors]
+
+
+@router.get("/mine", response_model=list[AppointmentOut])
+def list_my_appointments(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Rendez-vous du patient connecté, du plus récent/proche au plus ancien."""
+    if current_user.role != "patient":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only patients can access this view")
+
+    patient = db.query(Patient).filter(Patient.user_id == current_user.id).first()
+    if patient is None:
+        return []
+
+    appointments = (
+        db.query(Appointment)
+        .filter(Appointment.patient_id == patient.id)
+        .order_by(Appointment.appointment_date.desc())
+        .all()
+    )
+    return [_to_out(db, a) for a in appointments]
 
 
 @router.get("/all", response_model=list[AppointmentOut])
@@ -195,6 +218,23 @@ def create_appointment(
     )
     db.add(appointment)
     db.commit()
+
+    # Notification patient : seulement s'il a un compte de connexion — un
+    # dossier "admission directe" (patient.user_id is None) n'a personne à notifier.
+    if patient.user_id is not None:
+        db.add(
+            Notification(
+                user_id=patient.user_id,
+                type="appointment",
+                title="Nouveau rendez-vous",
+                message=(
+                    f"Dr. {doctor.full_name} a planifié un rendez-vous le "
+                    f"{appointment.appointment_date.strftime('%d/%m/%Y à %H:%M')}."
+                ),
+                link="/my-appointments",
+            )
+        )
+        db.commit()
 
     # Pas de db.refresh() : exige aussi une ligne unique par PK en base, et
     # on a déjà tout ce qu'il faut (patient/doctor déjà chargés ci-dessus).

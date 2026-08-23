@@ -7,8 +7,8 @@ import type { UserRole } from "../types/user";
 
 const roleLabels: Record<UserRole, string> = {
   patient: "Patient",
-  doctor: "Médecin",
-  admin: "Administrateur",
+  doctor: "Doctor",
+  admin: "Administrator",
 };
 
 export default function RegisterPage() {
@@ -30,7 +30,7 @@ export default function RegisterPage() {
     setError(null);
 
     if (password.length < 8) {
-      setError("Le mot de passe doit contenir au moins 8 caractères.");
+      setError("Password must be at least 8 characters long.");
       return;
     }
 
@@ -49,7 +49,7 @@ export default function RegisterPage() {
     } catch (err: any) {
       setError(
         err?.response?.data?.detail ??
-          "Impossible de créer le compte."
+          "Unable to create account."
       );
     } finally {
       setLoading(false);
@@ -68,11 +68,11 @@ export default function RegisterPage() {
           />
 
           <h1 className="font-display text-3xl text-pine">
-            Créer un compte
+            Create an account
           </h1>
 
           <p className="mt-2 text-sm text-ink-soft">
-            Rejoignez la plateforme de soins numérique.
+            Join the digital healthcare platform.
           </p>
         </div>
 
@@ -85,7 +85,7 @@ export default function RegisterPage() {
 
             <label className="block">
               <span className="text-xs font-medium uppercase tracking-wide text-ink-soft">
-                Nom et prénom
+                Full name
               </span>
 
               <input
@@ -98,7 +98,7 @@ export default function RegisterPage() {
 
             <label className="block">
               <span className="text-xs font-medium uppercase tracking-wide text-ink-soft">
-                E-mail
+                Email
               </span>
 
               <input
@@ -112,7 +112,7 @@ export default function RegisterPage() {
 
             <label className="block">
               <span className="text-xs font-medium uppercase tracking-wide text-ink-soft">
-                Mot de passe
+                Password
               </span>
 
               <input
@@ -127,7 +127,7 @@ export default function RegisterPage() {
 
             <label className="block">
               <span className="text-xs font-medium uppercase tracking-wide text-ink-soft">
-                Rôle
+                Role
               </span>
 
               <select
@@ -148,21 +148,21 @@ export default function RegisterPage() {
 
             <label className="block">
               <span className="text-xs font-medium uppercase tracking-wide text-ink-soft">
-                Clinique
+                Clinic
               </span>
 
               <input
                 value={clinicName}
                 onChange={(e) => setClinicName(e.target.value)}
-                placeholder="Ex. Clinique Atlas"
+                placeholder="E.g. Atlas Clinic"
                 required
                 className="mt-1.5 w-full rounded-lg border border-sand-dark bg-paper px-3.5 py-2.5 text-ink outline-none transition-colors focus:border-pine"
               />
 
               <p className="mt-1.5 text-xs text-ink-soft">
                 {role === "patient"
-                  ? "La clinique où vous allez consulter."
-                  : "Si cette clinique existe déjà, vous la rejoignez automatiquement. Sinon, elle est créée."}
+                  ? "The clinic where you will consult."
+                  : "If this clinic already exists, you'll join it automatically. Otherwise, it will be created."}
               </p>
             </label>
 
@@ -177,7 +177,7 @@ export default function RegisterPage() {
               disabled={loading}
               className="w-full rounded-lg bg-pine px-4 py-2.5 font-medium text-paper transition-colors hover:bg-pine-dark disabled:opacity-60"
             >
-              {loading ? "Création..." : "Créer mon compte"}
+              {loading ? "Creating..." : "Create my account"}
             </button>
 
           </div>
@@ -185,12 +185,12 @@ export default function RegisterPage() {
         </form>
 
         <p className="mt-6 text-center text-sm text-ink-soft">
-          Déjà inscrit ?{" "}
+          Already registered?{" "}
           <Link
             to="/login"
             className="font-medium text-pine hover:text-pine-dark"
           >
-            Se connecter
+            Sign in
           </Link>
         </p>
 

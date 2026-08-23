@@ -15,7 +15,7 @@ export default function ForgotPasswordPage() {
       const res = await authService.forgotPassword(email);
       setMessage(res.message);
     } catch {
-      setMessage("Si un compte existe pour cet e-mail, un lien de réinitialisation a été envoyé.");
+      setMessage("If an account exists for this email, a reset link has been sent.");
     } finally {
       setLoading(false);
     }
@@ -31,9 +31,9 @@ export default function ForgotPasswordPage() {
       <div className="relative w-full max-w-sm">
         <div className="mb-8 text-center">
           <VitalLine className="mx-auto mb-4 h-6 w-14 text-brass" strokeWidth={2.5} />
-          <h1 className="font-display text-3xl text-pine">Mot de passe oublié</h1>
+          <h1 className="font-display text-3xl text-pine">Forgot password</h1>
           <p className="mt-2 text-sm text-ink-soft">
-            Nous vous enverrons un lien de réinitialisation.
+            We will send you a reset link.
           </p>
         </div>
 
@@ -44,7 +44,7 @@ export default function ForgotPasswordPage() {
             <form onSubmit={handleSubmit} className="space-y-5">
               <label className="block">
                 <span className="text-xs font-medium uppercase tracking-wide text-ink-soft">
-                  E-mail
+                  Email
                 </span>
                 <input
                   type="email"
@@ -59,7 +59,7 @@ export default function ForgotPasswordPage() {
                 disabled={loading}
                 className="w-full rounded-lg bg-pine px-4 py-2.5 font-medium text-paper transition-colors hover:bg-pine-dark disabled:opacity-60"
               >
-                {loading ? "Envoi..." : "Envoyer le lien"}
+                {loading ? "Sending..." : "Send link"}
               </button>
             </form>
           )}
@@ -67,7 +67,7 @@ export default function ForgotPasswordPage() {
 
         <p className="mt-6 text-center text-sm">
           <Link to="/login" className="text-ink-soft hover:text-pine">
-            ← Retour à la connexion
+            ← Back to login
           </Link>
         </p>
       </div>

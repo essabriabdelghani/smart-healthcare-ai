@@ -65,7 +65,7 @@ export default function AddPatientPage() {
       setError(
         typeof apiMessage === "string"
           ? apiMessage
-          : clientMessage ?? "Impossible d'enregistrer ce patient. Veuillez réessayer."
+          : clientMessage ?? "Unable to register this patient. Please try again."
       );
     } finally {
       setSubmitting(false);
@@ -78,13 +78,13 @@ export default function AddPatientPage() {
         <div className="mb-3 flex items-center gap-3">
           <div className="h-8 w-1 rounded-full bg-brass" />
           <span className="text-xs font-semibold uppercase tracking-[0.18em] text-ink-soft">
-            Admission directe
+            Direct admission
           </span>
         </div>
-        <h1 className="font-display text-3xl text-pine sm:text-4xl">Ajouter un patient</h1>
+        <h1 className="font-display text-3xl text-pine sm:text-4xl">Add patient</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-ink-soft">
-          Ce dossier est créé sans compte de connexion pour le patient. Il n'a accès à aucune
-          page de l'application ; seuls les médecins et administrateurs peuvent le consulter.
+          This record is created without a login account for the patient. They have no access to
+          any application pages; only doctors and administrators can view it.
         </p>
       </div>
 
@@ -93,10 +93,10 @@ export default function AddPatientPage() {
         className="overflow-hidden rounded-2xl border border-sand-dark/60 bg-paper-raised shadow-sm"
       >
         <section className="p-6 sm:p-8">
-          <StepHeader n="1" title="Identité du patient" desc="Informations administratives de base." />
+          <StepHeader n="1" title="Patient identity" desc="Basic administrative information." />
           <div className="grid gap-5 sm:grid-cols-2">
             <label className="block">
-              <span className={labelClass}>Prénom</span>
+              <span className={labelClass}>First name</span>
               <input
                 type="text"
                 value={form.firstName}
@@ -107,7 +107,7 @@ export default function AddPatientPage() {
             </label>
 
             <label className="block">
-              <span className={labelClass}>Nom</span>
+              <span className={labelClass}>Last name</span>
               <input
                 type="text"
                 value={form.lastName}
@@ -118,7 +118,7 @@ export default function AddPatientPage() {
             </label>
 
             <label className="block">
-              <span className={labelClass}>Date de naissance</span>
+              <span className={labelClass}>Date of birth</span>
               <input
                 type="date"
                 value={form.dateOfBirth}
@@ -130,16 +130,16 @@ export default function AddPatientPage() {
             </label>
 
             <label className="block">
-              <span className={labelClass}>Sexe</span>
+              <span className={labelClass}>Gender</span>
               <select
                 value={form.gender}
                 onChange={(e) => update("gender", e.target.value as StaffPatientIntakeForm["gender"])}
                 className={fieldClass}
               >
-                <option value="unspecified">Non précisé</option>
-                <option value="female">Féminin</option>
-                <option value="male">Masculin</option>
-                <option value="other">Autre</option>
+                <option value="unspecified">Not specified</option>
+                <option value="female">Female</option>
+                <option value="male">Male</option>
+                <option value="other">Other</option>
               </select>
             </label>
           </div>
@@ -148,27 +148,27 @@ export default function AddPatientPage() {
         <div className="border-t border-sand-dark/60" />
 
         <section className="p-6 sm:p-8">
-          <StepHeader n="2" title="Motif de consultation" desc="Décrivez la raison principale de la visite." />
+          <StepHeader n="2" title="Reason for consultation" desc="Describe the main reason for the visit." />
           <div className="space-y-5">
             <label className="block">
-              <span className={labelClass}>Motif de la visite</span>
+              <span className={labelClass}>Reason for visit</span>
               <input
                 type="text"
                 value={form.reasonForVisit}
                 onChange={(e) => update("reasonForVisit", e.target.value)}
-                placeholder="Ex. Douleurs abdominales"
+                placeholder="E.g. Abdominal pain"
                 required
                 className={fieldClass}
               />
             </label>
 
             <label className="block">
-              <span className={labelClass}>Symptômes actuels</span>
+              <span className={labelClass}>Current symptoms</span>
               <textarea
                 value={form.symptomsText}
                 onChange={(e) => update("symptomsText", e.target.value)}
                 rows={5}
-                placeholder="Décrivez les symptômes, leur durée, leur évolution et leur intensité..."
+                placeholder="Describe the symptoms, duration, progression and intensity..."
                 required
                 className={`${fieldClass} resize-y`}
               />
@@ -179,10 +179,10 @@ export default function AddPatientPage() {
         <div className="border-t border-sand-dark/60" />
 
         <section className="p-6 sm:p-8">
-          <StepHeader n="3" title="Antécédents et traitements" desc="Informations médicales pertinentes." />
+          <StepHeader n="3" title="Medical history and treatments" desc="Relevant medical information." />
           <div className="space-y-5">
             <label className="block">
-              <span className={labelClass}>Antécédents médicaux</span>
+              <span className={labelClass}>Medical history</span>
               <textarea
                 value={form.medicalHistory}
                 onChange={(e) => update("medicalHistory", e.target.value)}
@@ -192,7 +192,7 @@ export default function AddPatientPage() {
             </label>
 
             <label className="block">
-              <span className={labelClass}>Médicaments actuels</span>
+              <span className={labelClass}>Current medications</span>
               <textarea
                 value={form.currentMedications}
                 onChange={(e) => update("currentMedications", e.target.value)}
@@ -216,10 +216,10 @@ export default function AddPatientPage() {
         <div className="border-t border-sand-dark/60" />
 
         <section className="p-6 sm:p-8">
-          <StepHeader n="4" title="Constantes vitales" desc="Valeurs mesurées lors de l'admission, si disponibles." />
+          <StepHeader n="4" title="Vital signs" desc="Measurements taken upon admission, if available." />
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             <label className="block">
-              <span className={labelClass}>Température</span>
+              <span className={labelClass}>Temperature</span>
               <div className="relative">
                 <input
                   type="number"
@@ -238,7 +238,7 @@ export default function AddPatientPage() {
             </label>
 
             <label className="block">
-              <span className={labelClass}>Pression artérielle</span>
+              <span className={labelClass}>Blood pressure</span>
               <input
                 type="text"
                 value={form.bloodPressure}
@@ -249,7 +249,7 @@ export default function AddPatientPage() {
             </label>
 
             <label className="block">
-              <span className={labelClass}>Fréquence cardiaque</span>
+              <span className={labelClass}>Heart rate</span>
               <div className="relative">
                 <input
                   type="number"
@@ -267,7 +267,7 @@ export default function AddPatientPage() {
             </label>
 
             <label className="block">
-              <span className={labelClass}>Saturation O₂</span>
+              <span className={labelClass}>O₂ saturation</span>
               <div className="relative">
                 <input
                   type="number"
@@ -297,14 +297,14 @@ export default function AddPatientPage() {
 
         <div className="flex flex-col gap-4 border-t border-sand-dark/60 bg-paper px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
           <p className="text-xs leading-5 text-ink-soft">
-            Ce dossier sera immédiatement évalué par le moteur de risque.
+            This record will be immediately evaluated by the risk engine.
           </p>
           <button
             type="submit"
             disabled={submitting}
             className="rounded-lg bg-pine px-6 py-3 text-sm font-medium text-paper transition-all hover:bg-pine-dark disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {submitting ? "Enregistrement..." : "Créer le dossier"}
+            {submitting ? "Saving..." : "Create record"}
           </button>
         </div>
       </form>

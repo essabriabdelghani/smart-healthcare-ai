@@ -97,7 +97,7 @@ export default function PatientFormPage() {
       setError(
         typeof apiMessage === "string"
           ? apiMessage
-          : clientMessage ?? "Impossible de soumettre le dossier patient. Veuillez réessayer."
+          : clientMessage ?? "Unable to submit patient record. Please try again."
       );
     } finally {
       setSubmitting(false);
@@ -105,7 +105,7 @@ export default function PatientFormPage() {
   }
 
   if (checkingProfile) {
-    return <p className="text-ink-soft">Chargement...</p>;
+    return <p className="text-ink-soft">Loading...</p>;
   }
 
   return (
@@ -115,14 +115,14 @@ export default function PatientFormPage() {
         <div className="mb-3 flex items-center gap-3">
           <div className="h-8 w-1 rounded-full bg-pine" />
           <span className="text-xs font-semibold uppercase tracking-[0.18em] text-ink-soft">
-            Dossier clinique
+            Clinical record
           </span>
         </div>
-        <h1 className="font-display text-3xl text-pine sm:text-4xl">Admission du patient</h1>
+        <h1 className="font-display text-3xl text-pine sm:text-4xl">Patient admission</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-ink-soft">
           {hasProfile
-            ? "Décrivez le motif de la visite pour lancer l'évaluation du niveau de risque."
-            : "Complétez d'abord votre profil, puis décrivez le motif de la visite."}
+            ? "Describe the reason for the visit to initiate the risk assessment."
+            : "First complete your profile, then describe the reason for the visit."}
         </p>
       </div>
 
@@ -130,19 +130,19 @@ export default function PatientFormPage() {
         onSubmit={handleSubmit}
         className="overflow-hidden rounded-2xl border border-sand-dark/60 bg-paper-raised shadow-sm"
       >
-        {/* 00. Profil patient — uniquement si pas encore créé */}
+        {/* 00. Patient profile — only if not yet created */}
         {!hasProfile && (
           <>
             <section className="p-6 sm:p-8">
               <StepHeader
                 n="0"
-                title="Profil patient"
-                desc="Ces informations ne sont demandées qu'une seule fois."
+                title="Patient profile"
+                desc="This information is only requested once."
               />
 
               <div className="grid gap-5 sm:grid-cols-2">
                 <label className="block">
-                  <span className={labelClass}>Prénom</span>
+                  <span className={labelClass}>First name</span>
                   <input
                     type="text"
                     value={profile.firstName}
@@ -153,7 +153,7 @@ export default function PatientFormPage() {
                 </label>
 
                 <label className="block">
-                  <span className={labelClass}>Nom</span>
+                  <span className={labelClass}>Last name</span>
                   <input
                     type="text"
                     value={profile.lastName}
@@ -164,7 +164,7 @@ export default function PatientFormPage() {
                 </label>
 
                 <label className="block">
-                  <span className={labelClass}>Date de naissance</span>
+                  <span className={labelClass}>Date of birth</span>
                   <input
                     type="date"
                     value={profile.dateOfBirth}
@@ -176,7 +176,7 @@ export default function PatientFormPage() {
                 </label>
 
                 <label className="block">
-                  <span className={labelClass}>Sexe</span>
+                  <span className={labelClass}>Gender</span>
                   <select
                     value={profile.gender}
                     onChange={(e) =>
@@ -184,21 +184,21 @@ export default function PatientFormPage() {
                     }
                     className={fieldClass}
                   >
-                    <option value="unspecified">Préfère ne pas préciser</option>
-                    <option value="female">Féminin</option>
-                    <option value="male">Masculin</option>
-                    <option value="other">Autre</option>
+                    <option value="unspecified">Prefer not to say</option>
+                    <option value="female">Female</option>
+                    <option value="male">Male</option>
+                    <option value="other">Other</option>
                   </select>
                 </label>
 
                 <label className="block">
-                  <span className={labelClass}>Groupe sanguin</span>
+                  <span className={labelClass}>Blood group</span>
                   <select
                     value={profile.bloodGroup}
                     onChange={(e) => updateProfile("bloodGroup", e.target.value)}
                     className={fieldClass}
                   >
-                    <option value="">Inconnu</option>
+                    <option value="">Unknown</option>
                     {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((bg) => (
                       <option key={bg} value={bg}>
                         {bg}
@@ -209,7 +209,7 @@ export default function PatientFormPage() {
 
                 <div className="grid grid-cols-2 gap-5">
                   <label className="block">
-                    <span className={labelClass}>Taille (cm)</span>
+                    <span className={labelClass}>Height (cm)</span>
                     <input
                       type="number"
                       min="0"
@@ -223,7 +223,7 @@ export default function PatientFormPage() {
                     />
                   </label>
                   <label className="block">
-                    <span className={labelClass}>Poids (kg)</span>
+                    <span className={labelClass}>Weight (kg)</span>
                     <input
                       type="number"
                       min="0"
@@ -239,18 +239,18 @@ export default function PatientFormPage() {
                 </div>
 
                 <label className="block">
-                  <span className={labelClass}>Contact d'urgence</span>
+                  <span className={labelClass}>Emergency contact</span>
                   <input
                     type="text"
                     value={profile.emergencyContact}
                     onChange={(e) => updateProfile("emergencyContact", e.target.value)}
-                    placeholder="Nom du contact"
+                    placeholder="Contact name"
                     className={fieldClass}
                   />
                 </label>
 
                 <label className="block">
-                  <span className={labelClass}>Téléphone d'urgence</span>
+                  <span className={labelClass}>Emergency phone</span>
                   <input
                     type="tel"
                     value={profile.emergencyPhone}
@@ -270,30 +270,30 @@ export default function PatientFormPage() {
         <section className="p-6 sm:p-8">
           <StepHeader
             n="1"
-            title="Motif de consultation"
-            desc="Décrivez la raison principale de la consultation."
+            title="Reason for consultation"
+            desc="Describe the main reason for the consultation."
           />
 
           <div className="space-y-5">
             <label className="block">
-              <span className={labelClass}>Motif de la visite</span>
+              <span className={labelClass}>Reason for visit</span>
               <input
                 type="text"
                 value={intake.reasonForVisit}
                 onChange={(e) => updateIntake("reasonForVisit", e.target.value)}
-                placeholder="Ex. Douleurs abdominales"
+                placeholder="E.g. Abdominal pain"
                 required
                 className={fieldClass}
               />
             </label>
 
             <label className="block">
-              <span className={labelClass}>Symptômes actuels</span>
+              <span className={labelClass}>Current symptoms</span>
               <textarea
                 value={intake.symptomsText}
                 onChange={(e) => updateIntake("symptomsText", e.target.value)}
                 rows={5}
-                placeholder="Décrivez les symptômes, leur durée, leur évolution et leur intensité..."
+                placeholder="Describe the symptoms, duration, progression and intensity..."
                 required
                 className={`${fieldClass} resize-y`}
               />
@@ -303,33 +303,33 @@ export default function PatientFormPage() {
 
         <div className="border-t border-sand-dark/60" />
 
-        {/* 02. Antécédents */}
+        {/* 02. Medical history */}
         <section className="p-6 sm:p-8">
           <StepHeader
             n="2"
-            title="Antécédents et traitements"
-            desc="Informations médicales pertinentes pour l'évaluation."
+            title="Medical history and treatments"
+            desc="Relevant medical information for the assessment."
           />
 
           <div className="space-y-5">
             <label className="block">
-              <span className={labelClass}>Antécédents médicaux</span>
+              <span className={labelClass}>Medical history</span>
               <textarea
                 value={intake.medicalHistory}
                 onChange={(e) => updateIntake("medicalHistory", e.target.value)}
                 rows={4}
-                placeholder="Maladies chroniques, interventions, hospitalisations..."
+                placeholder="Chronic conditions, surgeries, hospitalizations..."
                 className={`${fieldClass} resize-y`}
               />
             </label>
 
             <label className="block">
-              <span className={labelClass}>Médicaments actuels</span>
+              <span className={labelClass}>Current medications</span>
               <textarea
                 value={intake.currentMedications}
                 onChange={(e) => updateIntake("currentMedications", e.target.value)}
                 rows={3}
-                placeholder="Nom des médicaments et posologie si connue..."
+                placeholder="Medication names and dosage if known..."
                 className={`${fieldClass} resize-y`}
               />
             </label>
@@ -340,7 +340,7 @@ export default function PatientFormPage() {
                 type="text"
                 value={intake.allergies}
                 onChange={(e) => updateIntake("allergies", e.target.value)}
-                placeholder="Médicaments, aliments ou autres allergies..."
+                placeholder="Medication, food or other allergies..."
                 className={fieldClass}
               />
             </label>
@@ -349,17 +349,17 @@ export default function PatientFormPage() {
 
         <div className="border-t border-sand-dark/60" />
 
-        {/* 03. Constantes vitales */}
+        {/* 03. Vital signs */}
         <section className="p-6 sm:p-8">
           <StepHeader
             n="3"
-            title="Constantes vitales"
-            desc="Valeurs mesurées lors de l'admission, si disponibles."
+            title="Vital signs"
+            desc="Measurements taken upon admission, if available."
           />
 
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             <label className="block">
-              <span className={labelClass}>Température</span>
+              <span className={labelClass}>Temperature</span>
               <div className="relative">
                 <input
                   type="number"
@@ -380,7 +380,7 @@ export default function PatientFormPage() {
             </label>
 
             <label className="block">
-              <span className={labelClass}>Pression artérielle</span>
+              <span className={labelClass}>Blood pressure</span>
               <input
                 type="text"
                 value={intake.bloodPressure}
@@ -391,7 +391,7 @@ export default function PatientFormPage() {
             </label>
 
             <label className="block">
-              <span className={labelClass}>Fréquence cardiaque</span>
+              <span className={labelClass}>Heart rate</span>
               <div className="relative">
                 <input
                   type="number"
@@ -411,7 +411,7 @@ export default function PatientFormPage() {
             </label>
 
             <label className="block">
-              <span className={labelClass}>Saturation O₂</span>
+              <span className={labelClass}>O₂ saturation</span>
               <div className="relative">
                 <input
                   type="number"
@@ -440,15 +440,15 @@ export default function PatientFormPage() {
 
         {/* 04. Notes */}
         <section className="p-6 sm:p-8">
-          <StepHeader n="4" title="Informations complémentaires" desc="Tout autre élément utile au clinicien." />
+          <StepHeader n="4" title="Additional information" desc="Anything else useful for the clinician." />
 
           <label className="block">
-            <span className={labelClass}>Notes supplémentaires</span>
+            <span className={labelClass}>Additional notes</span>
             <textarea
               value={intake.additionalNotes}
               onChange={(e) => updateIntake("additionalNotes", e.target.value)}
               rows={4}
-              placeholder="Toute information complémentaire utile au professionnel de santé..."
+              placeholder="Any additional information useful for the healthcare professional..."
               className={`${fieldClass} resize-y`}
             />
           </label>
@@ -462,14 +462,14 @@ export default function PatientFormPage() {
 
         <div className="flex flex-col gap-4 border-t border-sand-dark/60 bg-paper px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
           <p className="text-xs leading-5 text-ink-soft">
-            Les informations saisies seront utilisées pour préparer l'évaluation clinique.
+            The information entered will be used to prepare the clinical assessment.
           </p>
           <button
             type="submit"
             disabled={submitting}
             className="rounded-lg bg-pine px-6 py-3 text-sm font-medium text-paper transition-all hover:bg-pine-dark disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {submitting ? "Évaluation en cours..." : "Soumettre le dossier"}
+            {submitting ? "Assessing..." : "Submit record"}
           </button>
         </div>
       </form>

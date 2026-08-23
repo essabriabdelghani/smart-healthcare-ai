@@ -177,3 +177,14 @@ export interface AuditLogEntry {
   wasModified: boolean;
   reviewedAt: string;
 }
+
+// Correspond à NotificationOut du backend
+export interface AppNotification {
+  id: string;
+  type: "appointment" | "clinical_note" | string;
+  title: string;
+  message: string;
+  link: string | null;
+  isRead: boolean;
+  createdAt: string;
+}

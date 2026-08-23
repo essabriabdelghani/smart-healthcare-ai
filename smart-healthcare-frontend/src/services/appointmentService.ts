@@ -97,6 +97,11 @@ export async function getAllAppointments(): Promise<Appointment[]> {
   return data.map(toAppointment);
 }
 
+export async function getMyAppointments(): Promise<Appointment[]> {
+  const { data } = await api.get<AppointmentApiResponse[]>("/appointments/mine");
+  return data.map(toAppointment);
+}
+
 export async function getClinicDoctors(): Promise<DoctorOption[]> {
   const { data } = await api.get<DoctorOptionApiResponse[]>("/appointments/doctors");
   return data.map(toDoctorOption);

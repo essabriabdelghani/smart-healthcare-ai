@@ -19,28 +19,28 @@ const riskText: Record<RiskLevel, string> = {
 };
 
 const riskLabel: Record<RiskLevel, string> = {
-  low: "Faible",
-  medium: "Modéré",
-  high: "Élevé",
-  critical: "Critique",
+  low: "Low",
+  medium: "Moderate",
+  high: "High",
+  critical: "Critical",
 };
 
 function formatRelativeTime(iso: string): string {
   const diffMs = Date.now() - new Date(iso).getTime();
   const minutes = Math.floor(diffMs / 60000);
-  if (minutes < 1) return "à l'instant";
-  if (minutes < 60) return `il y a ${minutes} min`;
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes} min ago`;
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `il y a ${hours} h`;
+  if (hours < 24) return `${hours} h ago`;
   const days = Math.floor(hours / 24);
-  if (days === 1) return "il y a 1 jour";
-  if (days < 7) return `il y a ${days} jours`;
+  if (days === 1) return "1 day ago";
+  if (days < 7) return `${days} days ago`;
   const weeks = Math.floor(days / 7);
-  if (weeks === 1) return "il y a 1 semaine";
-  if (weeks < 5) return `il y a ${weeks} semaines`;
+  if (weeks === 1) return "1 week ago";
+  if (weeks < 5) return `${weeks} weeks ago`;
   const months = Math.floor(days / 30);
-  if (months <= 1) return "il y a 1 mois";
-  return `il y a ${months} mois`;
+  if (months <= 1) return "1 month ago";
+  return `${months} months ago`;
 }
 
 function formatPhone(phone: string): string {
@@ -77,7 +77,7 @@ function groupByContact(rows: DoctorPatientRow[]): PatientGroup[] {
     );
     result.push({
       key,
-      phoneLabel: key.startsWith("__no_contact__") ? "Sans contact renseigné" : formatPhone(key),
+      phoneLabel: key.startsWith("__no_contact__") ? "No contact provided" : formatPhone(key),
       rows: sorted,
       needsReview: sorted.length > 1,
       latestCreatedAt: sorted[0].createdAt,
@@ -101,7 +101,7 @@ export default function DoctorDashboardPage() {
   useEffect(() => {
     getDoctorPatients()
       .then(setRows)
-      .catch(() => setError("Impossible de charger la liste des patients."))
+      .catch(() => setError("Unable to load patient list."))
       .finally(() => setLoading(false));
   }, []);
 
@@ -121,19 +121,19 @@ export default function DoctorDashboardPage() {
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
           <span className="text-xs font-medium uppercase tracking-widest text-brass">
-            Vue clinicien
+            Clinician view
           </span>
-          <h1 className="font-display text-4xl text-pine">Patients regroupés</h1>
+          <h1 className="font-display text-4xl text-pine">Patients grouped</h1>
           {criticalCount > 0 && (
             <p className="mt-1 text-sm font-medium text-risk-critical">
-              {criticalCount} cas critique{criticalCount > 1 ? "s" : ""} en attente de revue
+              {criticalCount} critical case{criticalCount > 1 ? "s" : ""} awaiting review
             </p>
           )}
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
           <input
-            placeholder="Rechercher un patient ou un motif..."
+            placeholder="Search for a patient or reason..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-64 rounded-lg border border-sand-dark bg-paper-raised px-3.5 py-2 text-sm text-ink outline-none transition-colors focus:border-pine"
@@ -143,14 +143,14 @@ export default function DoctorDashboardPage() {
               to="/doctor/patients/new"
               className="whitespace-nowrap rounded-lg bg-pine px-4 py-2 text-sm font-medium text-paper transition-colors hover:bg-pine-dark"
             >
-              + Ajouter un patient
+              + Add patient
             </Link>
           )}
         </div>
       </div>
 
       {loading ? (
-        <p className="text-ink-soft">Chargement...</p>
+        <p className="text-ink-soft">Loading...</p>
       ) : error ? (
         <div className="rounded-2xl border border-risk-high/20 bg-risk-high/5 px-8 py-10 text-center">
           <p className="text-risk-high">{error}</p>
@@ -158,14 +158,14 @@ export default function DoctorDashboardPage() {
       ) : groups.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-sand-dark bg-paper-raised px-8 py-16 text-center">
           <p className="text-ink-soft">
-            {search ? "Aucun résultat pour cette recherche." : "Aucun patient pour le moment."}
+            {search ? "No results for this search." : "No patients at the moment."}
           </p>
           {!search && canAddPatient && (
             <Link
               to="/doctor/patients/new"
               className="mt-3 inline-block font-medium text-pine hover:text-pine-dark"
             >
-              Ajouter le premier patient →
+              Add first patient →
             </Link>
           )}
         </div>
@@ -186,7 +186,7 @@ export default function DoctorDashboardPage() {
                 </span>
                 {group.needsReview ? (
                   <span className="rounded-full bg-brass/15 px-3 py-1 text-xs font-medium text-brass">
-                    À vérifier — {group.rows.length} admissions
+                    To check — {group.rows.length} admissions
                   </span>
                 ) : (
                   <span className="text-xs text-ink-soft">
@@ -205,7 +205,7 @@ export default function DoctorDashboardPage() {
                       {r.firstName} {r.lastName}
                       {!r.hasAccount && (
                         <span className="ml-2 rounded-full border border-brass/40 bg-brass/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-brass">
-                          Admission directe
+                          Direct admission
                         </span>
                       )}
                     </p>
@@ -229,7 +229,7 @@ export default function DoctorDashboardPage() {
                       to={`/risk-result/${r.intakeId}`}
                       className="text-sm font-medium text-pine hover:text-pine-dark"
                     >
-                      Voir
+                      View
                     </Link>
                   </div>
                 </div>

@@ -107,6 +107,22 @@ export async function forgotPassword(
 }
 
 /* ==========================
+   Reset Password
+========================== */
+
+export async function resetPassword(
+  token: string,
+  newPassword: string
+): Promise<{ message: string }> {
+  const { data } = await api.post("/auth/reset-password", {
+    token,
+    new_password: newPassword,
+  });
+
+  return data;
+}
+
+/* ==========================
    Logout
 ========================== */
 

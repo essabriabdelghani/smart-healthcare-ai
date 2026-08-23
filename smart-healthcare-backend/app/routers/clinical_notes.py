@@ -6,7 +6,9 @@ from app.deps import get_current_user
 
 from app.models.user import User
 from app.models.patient import Patient
+from app.models.patient_intake import PatientIntake
 from app.models.clinical_note import ClinicalNote
+from app.models.notification import Notification
 
 from app.schemas.clinical_note import ClinicalNoteCreate, ClinicalNoteOut
 
@@ -85,6 +87,26 @@ def create_clinical_note(
     )
     db.add(note)
     db.commit()
+
+    # Notification patient : seulement s'il a un compte de connexion.
+    if patient.user_id is not None:
+        latest_intake = (
+            db.query(PatientIntake)
+            .filter(PatientIntake.patient_id == patient.id)
+            .order_by(PatientIntake.created_at.desc())
+            .first()
+        )
+        link = f"/risk-result/{latest_intake.id}" if latest_intake else "/dashboard"
+        db.add(
+            Notification(
+                user_id=patient.user_id,
+                type="clinical_note",
+                title="Nouvelle note du médecin",
+                message=f"Dr. {current_user.full_name} a ajouté une note à votre dossier.",
+                link=link,
+            )
+        )
+        db.commit()
 
     # Pas de db.refresh() : on a déjà tout ce qu'il faut (patient/current_user
     # déjà chargés) — même précaution que pour appointments.py.

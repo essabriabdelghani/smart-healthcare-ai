@@ -19,17 +19,17 @@ const riskColor: Record<RiskLevel, string> = {
 };
 
 const riskLabel: Record<RiskLevel, string> = {
-  low: "Risque faible",
-  medium: "Risque modéré",
-  high: "Risque élevé",
-  critical: "Risque critique",
+  low: "Low risk",
+  medium: "Moderate risk",
+  high: "High risk",
+  critical: "Critical risk",
 };
 
 const entityTypeLabel: Record<string, string> = {
-  symptom: "Symptôme",
-  disease: "Antécédent / maladie",
-  medication: "Médicament",
-  allergy: "Allergie",
+  symptom: "Symptom",
+  disease: "History / disease",
+  medication: "Medication",
+  allergy: "Allergy",
 };
 
 function RiskGauge({ score, level }: { score: number; level: RiskLevel }) {
@@ -57,9 +57,9 @@ function RiskGauge({ score, level }: { score: number; level: RiskLevel }) {
   );
 }
 
-// Le backend renvoie "explanation" comme une phrase unique
-// (ex: "Chest pain reported (+35); High fever 38.6°C (+20)").
-// On la redécoupe uniquement pour l'affichage en liste.
+// The backend returns "explanation" as a single sentence
+// (e.g., "Chest pain reported (+35); High fever 38.6°C (+20)").
+// We split it only for display as a list.
 function splitExplanation(explanation: string): string[] {
   return explanation
     .split(";")
@@ -68,7 +68,7 @@ function splitExplanation(explanation: string): string[] {
 }
 
 function formatDateTime(iso: string): string {
-  return new Date(iso).toLocaleString("fr-FR", {
+  return new Date(iso).toLocaleString("en-US", {
     day: "2-digit",
     month: "short",
     hour: "2-digit",
@@ -76,8 +76,8 @@ function formatDateTime(iso: string): string {
   });
 }
 
-// Mêmes seuils que score_to_level() côté backend (risk_scoring.py) —
-// pour calculer le niveau correspondant au score ajusté par le médecin.
+// Same thresholds as score_to_level() on the backend (risk_scoring.py) —
+// to calculate the level corresponding to the doctor-adjusted score.
 function scoreToLevel(score: number): RiskLevel {
   if (score >= 70) return "critical";
   if (score >= 40) return "high";
@@ -152,7 +152,7 @@ export default function RiskResultPage() {
           ? apiMessage
           : err instanceof Error
             ? err.message
-            : "Impossible d'enregistrer la note."
+            : "Unable to save the note."
       );
     } finally {
       setSavingNote(false);
@@ -167,7 +167,7 @@ export default function RiskResultPage() {
       const updated = await reviewRiskAssessment(intakeId, { score: null, level: null, note: "" });
       setResult(updated);
     } catch (err: unknown) {
-      setReviewError(err instanceof Error ? err.message : "Impossible de confirmer le score.");
+      setReviewError(err instanceof Error ? err.message : "Unable to confirm score.");
     } finally {
       setReviewSubmitting(false);
     }
@@ -178,7 +178,7 @@ export default function RiskResultPage() {
     if (!intakeId) return;
     const score = Number(adjustScore);
     if (Number.isNaN(score) || score < 0 || score > 100) {
-      setReviewError("Le score doit être un nombre entre 0 et 100.");
+      setReviewError("Score must be a number between 0 and 100.");
       return;
     }
     setReviewSubmitting(true);
@@ -194,20 +194,20 @@ export default function RiskResultPage() {
       setAdjustScore("");
       setAdjustNote("");
     } catch (err: unknown) {
-      setReviewError(err instanceof Error ? err.message : "Impossible d'ajuster le score.");
+      setReviewError(err instanceof Error ? err.message : "Unable to adjust score.");
     } finally {
       setReviewSubmitting(false);
     }
   }
 
-  if (loading) return <p className="text-ink-soft">Chargement...</p>;
+  if (loading) return <p className="text-ink-soft">Loading...</p>;
 
   if (notFound || !result) {
     return (
       <div className="rounded-2xl border border-dashed border-sand-dark bg-paper-raised px-8 py-16 text-center">
-        <p className="text-ink-soft">Aucun résultat de risque pour cette admission.</p>
+        <p className="text-ink-soft">No risk result found for this admission.</p>
         <Link to="/dashboard" className="mt-3 inline-block font-medium text-pine hover:text-pine-dark">
-          ← Retour aux admissions
+          ← Back to admissions
         </Link>
       </div>
     );
@@ -222,9 +222,9 @@ export default function RiskResultPage() {
     <div className="mx-auto max-w-2xl">
       <div className="mb-8">
         <span className="text-xs font-medium uppercase tracking-widest text-brass">
-          Triage assisté par IA
+          AI-assisted triage
         </span>
-        <h1 className="font-display text-4xl text-pine">Évaluation du risque</h1>
+        <h1 className="font-display text-4xl text-pine">Risk assessment</h1>
       </div>
 
       <div className="rounded-2xl border border-sand-dark/60 bg-paper-raised p-8 shadow-sm">
@@ -241,16 +241,16 @@ export default function RiskResultPage() {
               {riskLabel[result.level]}
             </p>
             <p className="mt-1 text-sm text-ink-soft">
-              Confiance du modèle : {(result.modelConfidence * 100).toFixed(0)}%
+              Model confidence: {(result.modelConfidence * 100).toFixed(0)}%
             </p>
           </div>
         </div>
 
         <hr className="my-8 border-sand-dark/60" />
 
-        <h2 className="font-display text-lg text-pine">Facteurs contributifs</h2>
+        <h2 className="font-display text-lg text-pine">Contributing factors</h2>
         {factors.length === 0 ? (
-          <p className="mt-2 text-sm text-ink-soft">Aucun facteur de risque identifié.</p>
+          <p className="mt-2 text-sm text-ink-soft">No risk factors identified.</p>
         ) : (
           <ul className="mt-4 space-y-2">
             {factors.map((f) => (
@@ -264,9 +264,9 @@ export default function RiskResultPage() {
         {presentEntities.length > 0 && (
           <>
             <hr className="my-8 border-sand-dark/60" />
-            <h2 className="font-display text-lg text-pine">Éléments extraits automatiquement</h2>
+            <h2 className="font-display text-lg text-pine">Automatically extracted elements</h2>
             <p className="mt-1 text-sm text-ink-soft">
-              Détectés par le module NLP à partir du texte libre saisi par le patient.
+              Detected by the NLP module from the patient's free-text input.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               {presentEntities.map((e) => (
@@ -285,7 +285,7 @@ export default function RiskResultPage() {
         {negatedEntities.length > 0 && (
           <>
             <p className="mb-2 mt-6 text-xs font-medium uppercase tracking-wide text-ink-soft">
-              Explicitement niés par le patient (exclus du score)
+              Explicitly denied by the patient (excluded from score)
             </p>
             <div className="flex flex-wrap gap-2">
               {negatedEntities.map((e) => (
@@ -302,28 +302,28 @@ export default function RiskResultPage() {
         )}
 
         <p className="mt-8 border-l-2 border-brass pl-4 text-sm italic text-ink-soft">
-          Ce score assiste la décision clinique mais ne remplace jamais le jugement du clinicien.
+          This score assists clinical decision-making but never replaces clinical judgment.
         </p>
 
         <hr className="my-8 border-sand-dark/60" />
 
-        <h2 className="font-display text-lg text-pine">Revue clinique</h2>
+        <h2 className="font-display text-lg text-pine">Clinical review</h2>
 
         {result.reviewedAt ? (
           <div className="mt-3 rounded-lg bg-paper px-4 py-3 text-sm">
             {result.overrideScore !== null ? (
               <p className="text-ink">
-                Score ajusté par le médecin : <span className="font-mono font-medium">{result.overrideScore}</span>
+                Score adjusted by doctor: <span className="font-mono font-medium">{result.overrideScore}</span>
                 {result.overrideLevel && <> ({riskLabel[result.overrideLevel]})</>}
               </p>
             ) : (
-              <p className="text-ink">Score IA confirmé sans modification.</p>
+              <p className="text-ink">AI score confirmed without modification.</p>
             )}
             {result.overrideNote && <p className="mt-1 text-ink-soft">{result.overrideNote}</p>}
-            <p className="mt-1 text-xs text-ink-soft">Revu le {formatDateTime(result.reviewedAt)}</p>
+            <p className="mt-1 text-xs text-ink-soft">Reviewed on {formatDateTime(result.reviewedAt)}</p>
           </div>
         ) : canWriteNotes ? (
-          <p className="mt-1 text-sm text-ink-soft">Ce score n'a pas encore été revu par un clinicien.</p>
+          <p className="mt-1 text-sm text-ink-soft">This score has not yet been reviewed by a clinician.</p>
         ) : null}
 
         {canWriteNotes && (
@@ -335,13 +335,13 @@ export default function RiskResultPage() {
                   disabled={reviewSubmitting}
                   className="rounded-lg bg-pine px-4 py-2 text-sm font-medium text-paper transition-colors hover:bg-pine-dark disabled:opacity-60"
                 >
-                  {reviewSubmitting ? "..." : "Confirmer le score"}
+                  {reviewSubmitting ? "..." : "Confirm score"}
                 </button>
                 <button
                   onClick={() => setShowAdjustForm(true)}
                   className="rounded-lg border border-sand-dark px-4 py-2 text-sm font-medium text-ink-soft transition-colors hover:border-pine hover:text-pine"
                 >
-                  Ajuster le score
+                  Adjust score
                 </button>
               </div>
             ) : (
@@ -349,7 +349,7 @@ export default function RiskResultPage() {
                 <div className="flex items-end gap-3">
                   <label className="block">
                     <span className="text-xs font-medium uppercase tracking-wide text-ink-soft">
-                      Nouveau score (0-100)
+                      New score (0-100)
                     </span>
                     <input
                       type="number"
@@ -366,18 +366,18 @@ export default function RiskResultPage() {
                     onClick={() => setShowAdjustForm(false)}
                     className="pb-2 text-sm text-ink-soft hover:text-ink"
                   >
-                    Annuler
+                    Cancel
                   </button>
                 </div>
                 <label className="block">
                   <span className="text-xs font-medium uppercase tracking-wide text-ink-soft">
-                    Justification (optionnel)
+                    Justification (optional)
                   </span>
                   <textarea
                     value={adjustNote}
                     onChange={(e) => setAdjustNote(e.target.value)}
                     rows={2}
-                    placeholder="Raison de l'ajustement..."
+                    placeholder="Reason for adjustment..."
                     className="mt-1.5 w-full rounded-lg border border-sand-dark bg-paper px-3.5 py-2.5 text-sm text-ink outline-none focus:border-pine"
                   />
                 </label>
@@ -386,7 +386,7 @@ export default function RiskResultPage() {
                   disabled={reviewSubmitting}
                   className="rounded-lg bg-pine px-4 py-2 text-sm font-medium text-paper transition-colors hover:bg-pine-dark disabled:opacity-60"
                 >
-                  {reviewSubmitting ? "Enregistrement..." : "Enregistrer l'ajustement"}
+                  {reviewSubmitting ? "Saving..." : "Save adjustment"}
                 </button>
               </form>
             )}
@@ -397,9 +397,9 @@ export default function RiskResultPage() {
 
       {patientId && (
         <div className="mt-6 rounded-2xl border border-sand-dark/60 bg-paper-raised p-8 shadow-sm">
-          <h2 className="font-display text-lg text-pine">Notes cliniques</h2>
+          <h2 className="font-display text-lg text-pine">Clinical notes</h2>
           <p className="mt-1 text-sm text-ink-soft">
-            Observations du médecin sur ce patient, visibles à chaque consultation.
+            Doctor's observations about this patient, visible at each consultation.
           </p>
 
           {canWriteNotes && (
@@ -408,7 +408,7 @@ export default function RiskResultPage() {
                 value={newNote}
                 onChange={(e) => setNewNote(e.target.value)}
                 rows={3}
-                placeholder="Observation, décision clinique, suivi recommandé..."
+                placeholder="Observation, clinical decision, recommended follow-up..."
                 required
                 className="w-full rounded-lg border border-sand-dark bg-paper px-3.5 py-2.5 text-sm text-ink outline-none transition-all placeholder:text-ink-soft/60 focus:border-pine focus:ring-2 focus:ring-pine/10"
               />
@@ -418,7 +418,7 @@ export default function RiskResultPage() {
                 disabled={savingNote || !newNote.trim()}
                 className="rounded-lg bg-pine px-4 py-2 text-sm font-medium text-paper transition-colors hover:bg-pine-dark disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {savingNote ? "Enregistrement..." : "Ajouter la note"}
+                {savingNote ? "Saving..." : "Add note"}
               </button>
             </form>
           )}
@@ -426,16 +426,16 @@ export default function RiskResultPage() {
           <hr className="my-6 border-sand-dark/60" />
 
           {notesLoading ? (
-            <p className="text-sm text-ink-soft">Chargement des notes...</p>
+            <p className="text-sm text-ink-soft">Loading notes...</p>
           ) : notes.length === 0 ? (
-            <p className="text-sm text-ink-soft">Aucune note clinique pour ce patient.</p>
+            <p className="text-sm text-ink-soft">No clinical notes for this patient.</p>
           ) : (
             <ul className="space-y-4">
               {notes.map((n) => (
                 <li key={n.id} className="rounded-lg bg-paper px-4 py-3">
                   <p className="whitespace-pre-wrap text-sm text-ink">{n.note}</p>
                   <p className="mt-2 text-xs text-ink-soft">
-                    {n.doctorName ?? "Médecin"} · {formatDateTime(n.createdAt)}
+                    {n.doctorName ?? "Doctor"} · {formatDateTime(n.createdAt)}
                   </p>
                 </li>
               ))}

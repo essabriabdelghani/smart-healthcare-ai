@@ -13,6 +13,7 @@ from app.routers import (
     clinical_notes,
     appointments,
     users,
+    notifications,
 )
 
 Base.metadata.create_all(bind=engine)
@@ -38,6 +39,7 @@ app.include_router(dashboard.router, prefix="/api")
 app.include_router(clinical_notes.router, prefix="/api")
 app.include_router(appointments.router, prefix="/api")
 app.include_router(users.router, prefix="/api")
+app.include_router(notifications.router, prefix="/api")
 
 
 @app.get("/api/health")

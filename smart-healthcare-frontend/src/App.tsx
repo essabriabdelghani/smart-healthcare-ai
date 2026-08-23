@@ -3,8 +3,10 @@ import { Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import DashboardPage from "./pages/DashboardPage";
 import PatientFormPage from "./pages/PatientFormPage";
+import PatientAppointmentsPage from "./pages/PatientAppointmentsPage";
 import DoctorDashboardPage from "./pages/DoctorDashboardPage";
 import AddPatientPage from "./pages/AddPatientPage";
 import AppointmentsPage from "./pages/AppointmentsPage";
@@ -12,6 +14,7 @@ import RiskResultPage from "./pages/RiskResultPage";
 import AdminPanelPage from "./pages/AdminPanelPage";
 import SettingsPage from "./pages/SettingsPage";
 import SupportPage from "./pages/SupportPage";
+import NotificationsPage from "./pages/NotificationsPage";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import RoleHomeRedirect from "./components/RoleHomeRedirect";
@@ -27,6 +30,7 @@ function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
 
       {/* Dashboard patient : réservé aux comptes "patient" */}
       <Route
@@ -47,6 +51,18 @@ function App() {
           <ProtectedRoute allowedRoles={["patient"]}>
             <Layout>
               <PatientFormPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Mes rendez-vous : réservé aux comptes "patient" */}
+      <Route
+        path="/my-appointments"
+        element={
+          <ProtectedRoute allowedRoles={["patient"]}>
+            <Layout>
+              <PatientAppointmentsPage />
             </Layout>
           </ProtectedRoute>
         }
@@ -130,6 +146,16 @@ function App() {
           <ProtectedRoute>
             <Layout>
               <SupportPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/notifications"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <NotificationsPage />
             </Layout>
           </ProtectedRoute>
         }
