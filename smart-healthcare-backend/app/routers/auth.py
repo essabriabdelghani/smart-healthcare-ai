@@ -121,10 +121,7 @@ def login(
         token_type="bearer",
     )
 
-
-# ==========================
 # OAuth2 Login
-# ==========================
 
 @router.post(
     "/login/form",

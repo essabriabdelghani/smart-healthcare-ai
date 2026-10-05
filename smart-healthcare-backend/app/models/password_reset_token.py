@@ -18,8 +18,7 @@ class PasswordResetToken(Base):
         nullable=False,
     )
 
-    # Token opaque envoyé par e-mail (pas le id lui-même, pour ne pas
-    # exposer d'UUID prévisible dans l'URL — généré séparément, aléatoire).
+    
     token = Column(String(64), unique=True, nullable=False, index=True)
 
     expires_at = Column(DateTime(timezone=True), nullable=False)

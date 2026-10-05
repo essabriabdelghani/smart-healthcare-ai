@@ -108,6 +108,4 @@ def create_clinical_note(
         )
         db.commit()
 
-    # Pas de db.refresh() : on a déjà tout ce qu'il faut (patient/current_user
-    # déjà chargés) — même précaution que pour appointments.py.
     return _to_out(db, note)

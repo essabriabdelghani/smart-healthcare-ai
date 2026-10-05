@@ -12,18 +12,15 @@ class Patient(Base):
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
 
-    # Nullable : un dossier créé directement par un médecin/admin (admission
-    # "walk-in") n'a pas de compte utilisateur associé. Les patients qui
-    # s'inscrivent eux-mêmes ont bien un user_id.
+    
     user_id = Column(
-        BIGINT(unsigned=True),               # ← مطابق بالضبط لـ users.id (bigint(20) unsigned)
+        BIGINT(unsigned=True),               
         ForeignKey("users.id", ondelete="CASCADE"),
         unique=True,
         nullable=True,
     )
 
-    # Qui a créé ce dossier : le patient lui-même (auto-inscription) ou un
-    # médecin/admin (admission directe). Toujours renseigné, utile pour l'audit.
+    
     created_by = Column(
         BIGINT(unsigned=True),
         ForeignKey("users.id", ondelete="SET NULL"),

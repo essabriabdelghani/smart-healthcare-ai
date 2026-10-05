@@ -9,6 +9,7 @@ import {
   reviewRiskAssessment,
 } from "../services/patientService";
 import { useAuth } from "../contexts/AuthContext";
+import { AIAssistantWidget } from "../components/AIAssistantWidget";
 import type { ClinicalNote, ExtractedEntity, RiskLevel, RiskResult } from "../types/patient";
 
 const riskColor: Record<RiskLevel, string> = {
@@ -57,9 +58,6 @@ function RiskGauge({ score, level }: { score: number; level: RiskLevel }) {
   );
 }
 
-// The backend returns "explanation" as a single sentence
-// (e.g., "Chest pain reported (+35); High fever 38.6°C (+20)").
-// We split it only for display as a list.
 function splitExplanation(explanation: string): string[] {
   return explanation
     .split(";")
@@ -76,8 +74,6 @@ function formatDateTime(iso: string): string {
   });
 }
 
-// Same thresholds as score_to_level() on the backend (risk_scoring.py) —
-// to calculate the level corresponding to the doctor-adjusted score.
 function scoreToLevel(score: number): RiskLevel {
   if (score >= 70) return "critical";
   if (score >= 40) return "high";
@@ -394,6 +390,17 @@ export default function RiskResultPage() {
           </div>
         )}
       </div>
+
+      {patientId && canWriteNotes && (
+        <div className="mt-6">
+          <AIAssistantWidget
+            patientId={patientId}
+            intakeId={intakeId}
+            title="Ask about this patient"
+            placeholder="Why is this patient at critical risk?"
+          />
+        </div>
+      )}
 
       {patientId && (
         <div className="mt-6 rounded-2xl border border-sand-dark/60 bg-paper-raised p-8 shadow-sm">

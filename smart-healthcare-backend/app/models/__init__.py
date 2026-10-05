@@ -8,3 +8,4 @@ from .clinical_note import ClinicalNote
 from .appointment import Appointment
 from .notification import Notification
 from .password_reset_token import PasswordResetToken
+from .ai_conversation import AIConversation, AssistantMode

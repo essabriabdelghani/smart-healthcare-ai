@@ -27,9 +27,6 @@ class AppointmentOut(BaseModel):
     status: str
     notes: str | None
 
-    # Dernier niveau de risque connu pour ce patient (dernière admission
-    # évaluée) — utilisé côté frontend pour la bordure colorée de priorité.
-    # None si le patient n'a encore aucune admission évaluée.
     last_risk_level: str | None = None
 
 

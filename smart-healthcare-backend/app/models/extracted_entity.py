@@ -17,10 +17,11 @@ from app.database import Base
 class ExtractedEntity(Base):
     __tablename__ = "extracted_entities"
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
 
     intake_id = Column(
-        String,
+        String(36),
         ForeignKey("patient_intakes.id", ondelete="CASCADE"),
         nullable=False,
     )
@@ -29,11 +30,8 @@ class ExtractedEntity(Base):
 
     entity_value = Column(Text, nullable=False)
 
-    confidence = Column(DECIMAL(5,2))
+    confidence = Column(DECIMAL(5, 2))
 
-    # True = le patient a explicitement NIÉ ce symptôme/antécédent
-    # (ex: "no chest pain", "pas de fièvre"). Conservé pour l'audit, mais
-    # exclu du score de risque.
     negated = Column(Boolean, nullable=False, default=False)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())

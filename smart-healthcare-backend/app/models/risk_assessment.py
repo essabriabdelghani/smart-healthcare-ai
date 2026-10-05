@@ -43,7 +43,7 @@ class RiskAssessment(Base):
     ai_confidence = Column(DECIMAL(5, 2))
 
     reviewed_by = Column(
-        BIGINT(unsigned=True),        # ← بدلنا من String لـ BIGINT(unsigned=True)
+        BIGINT(unsigned=True),        
         ForeignKey("users.id"),
         nullable=True,
     )

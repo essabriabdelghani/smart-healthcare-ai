@@ -15,6 +15,7 @@ import AdminPanelPage from "./pages/AdminPanelPage";
 import SettingsPage from "./pages/SettingsPage";
 import SupportPage from "./pages/SupportPage";
 import NotificationsPage from "./pages/NotificationsPage";
+import AIAssistantPage from "./pages/AIAssistantPage";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import RoleHomeRedirect from "./components/RoleHomeRedirect";
@@ -124,6 +125,20 @@ function App() {
           <ProtectedRoute allowedRoles={["admin"]}>
             <Layout>
               <AdminPanelPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Assistant IA : questions générales (RAG). Réservé médecin/admin —
+          le mode "patient" (contexte clinique) est accessible séparément
+          via le widget embarqué sur RiskResultPage. */}
+      <Route
+        path="/ai-assistant"
+        element={
+          <ProtectedRoute allowedRoles={["doctor", "admin"]}>
+            <Layout>
+              <AIAssistantPage />
             </Layout>
           </ProtectedRoute>
         }

@@ -58,10 +58,7 @@ def _latest_risk_level(db: Session, patient_id: str) -> str | None:
 
 
 def _to_out(db: Session, appt: Appointment) -> AppointmentOut:
-    # On ne passe PAS par appt.patient / appt.doctor (relationship) : leur
-    # lazy-load interne exige exactement UNE ligne par clé primaire et plante
-    # (MultipleResultsFound) si la table réelle a des doublons d'id. Requête
-    # explicite + .first() = tolérant, comme partout ailleurs dans l'app.
+   
     patient = db.query(Patient).filter(Patient.id == appt.patient_id).first()
     doctor = db.query(User).filter(User.id == appt.doctor_id).first() if appt.doctor_id else None
 

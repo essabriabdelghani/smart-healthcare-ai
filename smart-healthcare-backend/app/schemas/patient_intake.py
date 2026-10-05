@@ -4,7 +4,6 @@ from pydantic import BaseModel, ConfigDict, field_validator
 
 
 class PatientIntakeCreate(BaseModel):
-    # patient_id مشي هنا — الباكند كيresolvih من current_user
 
     reason_for_visit: str
     symptoms_text: str

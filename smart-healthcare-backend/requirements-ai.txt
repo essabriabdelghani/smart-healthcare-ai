@@ -1,0 +1,10 @@
+# Dépendances additionnelles pour l'Assistant IA (RAG + client Qwen local).
+# Installation :
+#     pip install -r requirements-ai.txt --break-system-packages
+#
+# Ne remplace pas requirements.txt existant du projet — s'ajoute à côté.
+
+chromadb>=0.5,<0.6
+sentence-transformers>=3.0,<4.0
+pypdf>=4.0,<5.0
+requests>=2.31

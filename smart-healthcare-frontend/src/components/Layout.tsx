@@ -100,6 +100,17 @@ function IconLogout(props: IconProps) {
   );
 }
 
+// Nouvelle icône dédiée à l'Assistant IA (étincelle) — distincte des
+// autres pour être identifiable au premier coup d'œil dans la sidebar.
+function IconSparkles(props: IconProps) {
+  return (
+    <svg {...iconBase} {...props}>
+      <path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6L12 3z" />
+      <path d="M19 15l0.7 2 2 0.7-2 0.7-0.7 2-0.7-2-2-0.7 2-0.7 0.7-2z" />
+    </svg>
+  );
+}
+
 const iconByLabel: Record<string, (props: IconProps) => ReactElement> = {
   "Dashboard": IconDashboard,
   "My admissions": IconDashboard,
@@ -108,6 +119,7 @@ const iconByLabel: Record<string, (props: IconProps) => ReactElement> = {
   "Add patient": IconFilePlus,
   "Appointments": IconCalendar,
   "Administration": IconShieldLock,
+  "AI Assistant": IconSparkles,
 };
 
 /* =========================================================
@@ -124,10 +136,12 @@ const navItemsByRole: Record<UserRole, { to: string; label: string }[]> = {
     { to: "/doctor/dashboard", label: "Patients" },
     { to: "/doctor/patients/new", label: "Add patient" },
     { to: "/doctor/appointments", label: "Appointments" },
+    { to: "/ai-assistant", label: "AI Assistant" },
   ],
   admin: [
     { to: "/doctor/dashboard", label: "Patients" },
     { to: "/admin", label: "Administration" },
+    { to: "/ai-assistant", label: "AI Assistant" },
   ],
 };
 

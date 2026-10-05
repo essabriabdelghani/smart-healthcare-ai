@@ -23,6 +23,12 @@ class Settings(BaseSettings):
     # Durée de validité du lien de réinitialisation
     reset_token_expire_minutes: int = 30
 
+    ollama_base_url: str = "http://localhost:11434"
+    ollama_model: str = "qwen2.5:7b-instruct"
+    chroma_persist_dir: str = "./chroma_db"
+    embedding_model_name: str = "intfloat/multilingual-e5-base"
+
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 

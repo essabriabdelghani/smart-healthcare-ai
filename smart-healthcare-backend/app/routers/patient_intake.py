@@ -47,13 +47,31 @@ def get_or_create_patient(db: Session, current_user: User) -> Patient:
     return patient
 
 
+def _build_nlp_text(symptoms_text: str, medical_history: str | None) -> str:
+    """Combine les champs texte libre en garantissant une frontière de
+    phrase explicite entre chacun, quelle que soit la ponctuation saisie
+    par l'utilisateur.
+
+    Bug corrigé : sans ce garde-fou (simple f-string avec un espace), un
+    symptoms_text ne se terminant pas par un point (ex: "No fever and no
+    cough" sans point final) fusionnait avec medical_history en une seule
+    phrase pour split_sentences(). La fenêtre de négation de "no cough"
+    s'étendait alors à tort jusqu'à des termes du champ suivant (ex:
+    "hypertension", "heart attack"), les faisant passer pour niés alors
+    qu'ils étaient bien présents."""
+    parts = [symptoms_text.strip().rstrip(".")]
+    if medical_history and medical_history.strip():
+        parts.append(medical_history.strip().rstrip("."))
+    return ". ".join(parts) + "."
+
+
 def _run_intake_pipeline(db: Session, intake: PatientIntake) -> None:
     """NLP (extraction d'entités) + calcul du score de risque pour un intake
     fraîchement créé. Partagé entre la création patient et la création staff.
     Un seul appel NLP : le score consomme directement ce que l'extraction a
     trouvé (négation comprise), au lieu de reparser le texte séparément."""
 
-    nlp_text = f"{intake.symptoms_text} {intake.medical_history or ''}"
+    nlp_text = _build_nlp_text(intake.symptoms_text, intake.medical_history)
 
     # Ne doit jamais faire échouer la soumission si le NLP plante.
     try:

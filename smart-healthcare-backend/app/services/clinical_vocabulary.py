@@ -123,7 +123,10 @@ _NEGATION_WINDOW_CHARS = 40
 
 
 def split_sentences(text: str) -> list[str]:
-    return re.split(r"[.!?;\n]+", text)
+    # Filtre les chaînes vides (ex: chaîne finale vide quand le texte se
+    # termine par un délimiteur — bug trouvé par test_negation.py, sans
+    # impact fonctionnel réel mais évite un élément fantôme dans la liste).
+    return [s for s in re.split(r"[.!?;\n]+", text) if s.strip()]
 
 
 def is_negated(sentence: str, keyword_start: int, cues: list[str]) -> bool:

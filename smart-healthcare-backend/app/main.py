@@ -14,6 +14,7 @@ from app.routers import (
     appointments,
     users,
     notifications,
+    ai_assistant,
 )
 
 Base.metadata.create_all(bind=engine)
@@ -40,6 +41,8 @@ app.include_router(clinical_notes.router, prefix="/api")
 app.include_router(appointments.router, prefix="/api")
 app.include_router(users.router, prefix="/api")
 app.include_router(notifications.router, prefix="/api")
+
+app.include_router(ai_assistant.router, prefix="/api") 
 
 
 @app.get("/api/health")
